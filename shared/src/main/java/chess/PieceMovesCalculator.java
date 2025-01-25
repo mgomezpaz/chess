@@ -90,11 +90,49 @@ public interface PieceMovesCalculator {
             return moves;
         }
     }
-
+    /*TODO: This is basically a mix between king and bishop, 
+    we can use the same logic as bishop but with the king directions
+    */
     class QueenMovesCalculator implements PieceMovesCalculator {
         @Override
         public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-            return new ArrayList<>(); // TODO: Implement queen moves
+            List<ChessMove> moves = new ArrayList<>();
+
+            // get possible directions for the queen
+            int[][] queen_rules = {{1, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+            
+            for (int[] queen_direction : queen_rules) {
+                int row = position.getRow();
+                int col = position.getColumn();
+                
+                while (true) {
+                    row += queen_direction[0];
+                    col += queen_direction[1];
+
+                    // make sure that the move is in the board
+                    if (col < 1 || col > 8 || row < 1 || row > 8) {
+                        break;
+                    }
+                    
+                    // find information about the new position being considered
+                    ChessPosition newPosition = new ChessPosition(row, col);
+                    ChessPiece newPositionStatus = board.getPiece(newPosition);
+                    
+                    // if the position is empty, it is a possible move
+                    if (newPositionStatus == null) {
+                        moves.add(new ChessMove(position, newPosition, null));
+                        continue;
+                    }
+                    
+                    // if the position is not empty, make sure it is an enemy piece
+                    if (newPositionStatus.getTeamColor() != board.getPiece(position).getTeamColor()) {
+                        moves.add(new ChessMove(position, newPosition, null));
+                    }
+                    break;
+                }
+            }
+            
+            return moves;
         }
     }
 
