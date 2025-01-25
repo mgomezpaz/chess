@@ -1,0 +1,88 @@
+package chess;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+
+public interface PieceMovesCalculator {
+    Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position);
+    
+    class BishopMovesCalculator implements PieceMovesCalculator {
+        public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
+            List<ChessMove> moves = new ArrayList<>();
+            
+            // get possible directions for the bishop
+            int[][] bishop_rules = {{1, 1}, {-1, 1}, {-1, -1}, {1, -1}};
+            
+            for (int[] bishop_direction : bishop_rules) {
+                int row = position.getRow();
+                int col = position.getColumn();
+                
+                while (true) {
+                    row += bishop_direction[0];
+                    col += bishop_direction[1];
+
+                    // make sure that the move is in the board
+                    if (col < 1 || col > 8 || row < 1 || row > 8) {
+                        break;
+                    }
+                    
+                    // find information about the new position being considered
+                    ChessPosition newPosition = new ChessPosition(row, col);
+                    ChessPiece newPositionStatus = board.getPiece(newPosition);
+                    
+                    // if the position is empty, it is a possible move
+                    if (newPositionStatus == null) {
+                        moves.add(new ChessMove(position, newPosition, null));
+                        continue;
+                    }
+                    
+                    // if the position is not empty, make sure it is an enemy piece
+                    if (newPositionStatus.getTeamColor() != board.getPiece(position).getTeamColor()) {
+                        moves.add(new ChessMove(position, newPosition, null));
+                    }
+                    break;
+                }
+            }
+            
+            return moves;
+        }
+    }
+
+    class KingMovesCalculator implements PieceMovesCalculator {
+        @Override
+        public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
+            return new ArrayList<>(); // TODO: Implement king moves
+        }
+    }
+
+    class QueenMovesCalculator implements PieceMovesCalculator {
+        @Override
+        public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
+            return new ArrayList<>(); // TODO: Implement queen moves
+        }
+    }
+
+    class KnightMovesCalculator implements PieceMovesCalculator {
+        @Override
+        public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
+            return new ArrayList<>(); // TODO: Implement knight moves
+        }
+    }
+
+    class RookMovesCalculator implements PieceMovesCalculator {
+        @Override
+        public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
+            return new ArrayList<>(); // TODO: Implement rook moves
+
+        }
+    }
+
+    class PawnMovesCalculator implements PieceMovesCalculator {
+        @Override
+        public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
+            return new ArrayList<>(); // TODO: Implement pawn moves
+        }
+    }
+} 
