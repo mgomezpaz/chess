@@ -50,10 +50,44 @@ public interface PieceMovesCalculator {
         }
     }
 
+    // TODO: Implement king moves, basically the same as bishop, but chaning thhe possible directions.
     class KingMovesCalculator implements PieceMovesCalculator {
-        @Override
         public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-            return new ArrayList<>(); // TODO: Implement king moves
+            List<ChessMove> moves = new ArrayList<>();
+            
+            // get possible directions for the king
+            int[][] king_rules = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}, {-1, -1}, {1, -1}};
+            
+            for (int[] king_direction : king_rules) {
+                int row = position.getRow();
+                int col = position.getColumn();
+                
+                // calculate the new position
+                row += king_direction[0];
+                col += king_direction[1];
+
+                // make sure that the move is in the board, if not, get the next direction
+                if (col < 1 || col > 8 || row < 1 || row > 8) {
+                    continue;
+                }
+                
+                // find information about the new position being considered
+                ChessPosition newPosition = new ChessPosition(row, col);
+                ChessPiece newPositionStatus = board.getPiece(newPosition);
+                
+                // if the position is empty, it is a possible move
+                if (newPositionStatus == null) {
+                    moves.add(new ChessMove(position, newPosition, null));
+                    continue;
+                }
+                
+                // if the position is not empty, make sure it is an enemy piece
+                if (newPositionStatus.getTeamColor() != board.getPiece(position).getTeamColor()) {
+                moves.add(new ChessMove(position, newPosition, null));
+                }
+            }
+            
+            return moves;
         }
     }
 
