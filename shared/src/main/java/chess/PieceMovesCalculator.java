@@ -7,7 +7,10 @@ import java.util.List;
 
 public interface PieceMovesCalculator {
     Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position);
-    
+
+    /* 
+    DONE: Implement bishop moves
+    */
     class BishopMovesCalculator implements PieceMovesCalculator {
         public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
             List<ChessMove> moves = new ArrayList<>();
@@ -50,7 +53,9 @@ public interface PieceMovesCalculator {
         }
     }
 
-    // TODO: Implement king moves, basically the same as bishop, but chaning thhe possible directions.
+    /* DONE: Implement king moves, basically the same as bishop, 
+    but chaning thhe possible directions. 
+    */
     class KingMovesCalculator implements PieceMovesCalculator {
         public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
             List<ChessMove> moves = new ArrayList<>();
@@ -90,7 +95,9 @@ public interface PieceMovesCalculator {
             return moves;
         }
     }
-    /*TODO: This is basically a mix between king and bishop, 
+    /* 
+    DONE: Implement the queen moves, 
+    this is basically a mix between king and bishop, 
     we can use the same logic as bishop but with the king directions
     */
     class QueenMovesCalculator implements PieceMovesCalculator {
@@ -136,10 +143,48 @@ public interface PieceMovesCalculator {
         }
     }
 
+    /* 
+    DONE: Implement knight moves, basically the same as king, 
+    but changing the possible directions.
+    */
     class KnightMovesCalculator implements PieceMovesCalculator {
         @Override
         public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-            return new ArrayList<>(); // TODO: Implement knight moves
+            List<ChessMove> moves = new ArrayList<>();
+            
+            // get possible directions for the knight
+            int[][] knight_rules = {{2, 1}, {2, -1}, {-2, 1}, {-2, -1}, {1, 2}, {1, -2}, {-1, 2}, {-1, -2}};
+            
+            for (int[] knight_direction : knight_rules) {
+                int row = position.getRow();
+                int col = position.getColumn();
+                
+                // calculate the new position
+                row += knight_direction[0];
+                col += knight_direction[1];
+
+                // make sure that the move is in the board, if not, get the next direction
+                if (col < 1 || col > 8 || row < 1 || row > 8) {
+                    continue;
+                }
+                
+                // find information about the new position being considered
+                ChessPosition newPosition = new ChessPosition(row, col);
+                ChessPiece newPositionStatus = board.getPiece(newPosition);
+                
+                // if the position is empty, it is a possible move
+                if (newPositionStatus == null) {
+                    moves.add(new ChessMove(position, newPosition, null));
+                    continue;
+                }
+                
+                // if the position is not empty, make sure it is an enemy piece
+                if (newPositionStatus.getTeamColor() != board.getPiece(position).getTeamColor()) {
+                moves.add(new ChessMove(position, newPosition, null));
+                }
+            }
+            
+            return moves;
         }
     }
 
