@@ -243,6 +243,7 @@ public interface PieceMovesCalculator {
     we need to check if the pawn is moving forward, 
     if it is, we need to check if the position is empty or has a piece
     it can also move diagonally to kill another piece
+    (include promotion cases)
     */
 
     class PawnMovesCalculator implements PieceMovesCalculator {
