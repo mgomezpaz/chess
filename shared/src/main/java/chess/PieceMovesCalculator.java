@@ -249,6 +249,7 @@ public interface PieceMovesCalculator {
         @Override
         public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
             List<ChessMove> moves = new ArrayList<>();
+            
             // get the color of the pawn
             ChessGame.TeamColor color = board.getPiece(position).getTeamColor();
             int starting_position = position.getRow();
@@ -265,16 +266,18 @@ public interface PieceMovesCalculator {
                 pawn_rules = new int[][]{{-1, 0}, {-1, 1}, {-1, -1}, {-2, 0}};
             }
             
-            // loop thorugh the directions
+            // loop thorugh all possible directions
             for (int[] pawn_direction : pawn_rules) {
+
+                // get current location and possible new position
                 int row = position.getRow();
                 int col = position.getColumn();
                 row += pawn_direction[0];
                 col += pawn_direction[1];
 
-                // make sure that the move is in the board
+                // make sure that the move is in the board (legal?)
                 if (col < 1 || col > 8 || row < 1 || row > 8) {
-                    break;
+                    continue;
                 }
 
                 // get information about the new position
@@ -282,42 +285,62 @@ public interface PieceMovesCalculator {
                 ChessPiece newPositionStatus = board.getPiece(newPosition);
 
     
-                // if moving forward by one
+                // case 1: If moving forward by one
                 if (pawn_direction[1] == 0 && (pawn_direction[0] == 1 || pawn_direction[0] == -1)) {
+                    
                     // if the position is empty, it is a possible move
                     if (newPositionStatus == null) {
-                        moves.add(new ChessMove(position, newPosition, null));
-                        continue;
+                        // If there is promotion
+                        if ((color == ChessGame.TeamColor.WHITE && row == 8) || 
+                            (color == ChessGame.TeamColor.BLACK && row == 1)) {
+                            // Include possible promotion moves
+                            moves.add(new ChessMove(position, newPosition, ChessPiece.PieceType.QUEEN));
+                            moves.add(new ChessMove(position, newPosition, ChessPiece.PieceType.ROOK));
+                            moves.add(new ChessMove(position, newPosition, ChessPiece.PieceType.KNIGHT));
+                            moves.add(new ChessMove(position, newPosition, ChessPiece.PieceType.BISHOP));
+                        } else {
+                            moves.add(new ChessMove(position, newPosition, null));
+                        }
                     }
+                    continue;
                 }
 
-                // if moving diagonally
+                // Case 2: If moving diagonally
                 if (pawn_direction[1] == 1 || pawn_direction[1] == -1) {
-                    // if the position is not empty, make sure it is an enemy piece
-                    if (newPositionStatus.getTeamColor() != board.getPiece(position).getTeamColor()) {
-                        moves.add(new ChessMove(position, newPosition, null));
+                    
+                    // Only move diagonal  if there's an enemy piece to capture
+                    if (newPositionStatus != null && 
+                        newPositionStatus.getTeamColor() != board.getPiece(position).getTeamColor()) {
+                        // Check for promotion after capture
+                        if ((color == ChessGame.TeamColor.WHITE && row == 8) || 
+                            (color == ChessGame.TeamColor.BLACK && row == 1)) {
+                            // Include possible promotion moves
+                            moves.add(new ChessMove(position, newPosition, ChessPiece.PieceType.QUEEN));
+                            moves.add(new ChessMove(position, newPosition, ChessPiece.PieceType.ROOK));
+                            moves.add(new ChessMove(position, newPosition, ChessPiece.PieceType.KNIGHT));
+                            moves.add(new ChessMove(position, newPosition, ChessPiece.PieceType.BISHOP));
+                        } else {
+                            moves.add(new ChessMove(position, newPosition, null));
+                        }
                     }
+                    continue;
                 }
 
                 // if moving by two
                 if (pawn_direction[1] == 0 && (pawn_direction[0] == 2 || pawn_direction[0] == -2)) {
-                    // if the pawn in the starting position as white
-                    if (color == ChessGame.TeamColor.WHITE && starting_position == 2) {
-                        // if the position is empty, it is a possible move
-                        if (newPositionStatus == null) {
+
+                    // Can only move two squares if path is clear
+                    if (((color == ChessGame.TeamColor.WHITE && starting_position == 2) || (color == ChessGame.TeamColor.BLACK && starting_position == 7)) && newPositionStatus == null) {
+                        // make sure the path is not blocked
+                        int path_row = position.getRow() + (pawn_direction[0] / 2);
+                        ChessPosition path_position = new ChessPosition(path_row, col);
+                        if (board.getPiece(path_position) == null) {
                             moves.add(new ChessMove(position, newPosition, null));
-                            continue;
-                        }
-                        
-                    //if the pawn in the starting position as black
-                    } else if (color == ChessGame.TeamColor.BLACK && starting_position == 7) {
-                        // if the position is empty, it is a possible move
-                        if (newPositionStatus == null) {
-                                moves.add(new ChessMove(position, newPosition, null));
-                            continue;
                         }
                     }
-                } 
+                    continue;
+                }
+                
             }
             
             return moves;
