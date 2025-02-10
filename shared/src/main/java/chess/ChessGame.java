@@ -1,7 +1,15 @@
 package chess;
 
 import java.util.Collection;
+/**
+ * Key Methods:
 
+validMoves: Takes as input a position on the chessboard and returns all moves the piece there can legally make. If there is no piece at that location, this method returns null. A move is valid if it is a "piece move" for the piece at the input location and making that move would not leave the team’s king in danger of check.
+makeMove: Receives a given move and executes it, provided it is a legal move. If the move is illegal, it throws an InvalidMoveException. A move is illegal if it is not a "valid" move for the piece at the starting location, or if it’s not the corresponding team's turn.
+isInCheck: Returns true if the specified team’s King could be captured by an opposing piece.
+isInCheckmate: Returns true if the given team has no way to protect their king from being captured.
+isInStalemate: Returns true if the given team has no legal moves but their king is not in immediate danger.
+ */
 /**
  * For a class that can manage a chess game, making moves on a board
  * <p>
@@ -13,12 +21,16 @@ public class ChessGame {
     public ChessGame() {
 
     }
+    private TeamColor teamTurn;
+    private ChessBoard board;
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        // remember starting player is white
+        return TeamColor.WHITE;
+
     }
 
     /**
@@ -46,7 +58,17 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        
+        // get the piece at the position
+        ChessPiece piece = getBoard().getPiece(startPosition);
+        // make sure there is a piece there
+
+        if (piece == null) {
+            return null;
+        }
+
+        // get the valid moves for the piece
+        return piece.pieceMoves(getBoard(), startPosition);
     }
 
     /**
@@ -96,6 +118,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
+        // set the board
         throw new RuntimeException("Not implemented");
     }
 
@@ -105,6 +128,7 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
+        // get the board
         throw new RuntimeException("Not implemented");
     }
 }
