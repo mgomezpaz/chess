@@ -22,15 +22,14 @@ public class ChessGame {
 
     }
     private TeamColor teamTurn;
-    private ChessBoard board;
+    private ChessBoard board = new ChessBoard();
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
         // remember starting player is white
-        return TeamColor.WHITE;
-
+        return teamTurn;
     }
 
     /**
@@ -39,7 +38,8 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        // set the team turn
+        teamTurn = team;
     }
 
     /**
@@ -59,16 +59,17 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         
+        ChessBoard board = getBoard();
         // get the piece at the position
-        ChessPiece piece = getBoard().getPiece(startPosition);
-        // make sure there is a piece there
+        ChessPiece piece = board.getPiece(startPosition);
 
+        // make sure there is a piece there
         if (piece == null) {
             return null;
         }
 
         // get the valid moves for the piece
-        return piece.pieceMoves(getBoard(), startPosition);
+        return piece.pieceMoves(board, startPosition);
     }
 
     /**
@@ -119,7 +120,11 @@ public class ChessGame {
      */
     public void setBoard(ChessBoard board) {
         // set the board
-        throw new RuntimeException("Not implemented");
+        this.board = board;
+        // reset the board
+        this.board.resetBoard();
+        // set the team turn
+        this.teamTurn = TeamColor.WHITE;
     }
 
     /**
@@ -129,6 +134,6 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         // get the board
-        throw new RuntimeException("Not implemented");
+        return board;
     }
 }
