@@ -109,7 +109,43 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        
+        // get the piece we are moving
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        if (piece == null) {
+            throw new InvalidMoveException("No piece at start position");
+        }
+
+        // check if the piece is the correct team
+        if (piece.getTeamColor() != teamTurn) {
+            throw new InvalidMoveException("Wrong team");
+        }
+
+        // check if the move is valid
+        if (!validMoves(move.getStartPosition()).contains(move)) {
+            throw new InvalidMoveException("Invalid move");
+        }
+
+        // is it a promotion?
+        if (move.getPromotionPiece() != null) {
+            // check if the promotion is valid
+            if (!validMoves(move.getStartPosition()).contains(move)) {
+                throw new InvalidMoveException("Invalid promotion");
+            }
+            // make the promotion
+            board.addPiece(move.getEndPosition(), new ChessPiece(piece.getTeamColor(), move.getPromotionPiece()));
+            board.addPiece(move.getStartPosition(), null);
+            // switch the team turn
+            teamTurn = teamTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+            return;
+        }
+        else {
+            // make the move
+            board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+            board.addPiece(move.getStartPosition(), null);
+            // switch the team turn
+            teamTurn = teamTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        }
     }
 
     /**
@@ -140,7 +176,7 @@ public class ChessGame {
         }
 
         if (kingPosition == null) {
-            throw new RuntimeException("King not found on board");
+            throw new RuntimeException("King not in the board");
         }
 
         // Check if any enemy piece can capture the king
@@ -173,7 +209,29 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        // check if the team is in check
+        if (!isInCheck(teamColor)) {
+            return false;
+        }
+
+        // check if the team has any valid moves
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition currentPosition = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(currentPosition);
+
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    Collection<ChessMove> possibleMoves = piece.pieceMoves(board, currentPosition);
+                    for (ChessMove move : possibleMoves) {
+                        if (validMoves(move.getStartPosition()).contains(move)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
