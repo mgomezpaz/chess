@@ -70,6 +70,24 @@ public class ChessBoard {
         squares[0][7] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);   // r
     }
 
+    public void copyBoard(ChessBoard board) {
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null) {
+                    squares[row-1][col-1] = new ChessPiece(piece.getTeamColor(), piece.getPieceType());
+                } else {
+                    squares[row-1][col-1] = null;
+                }
+            }
+        }
+    }
+
+    public void removePiece(ChessPosition position) {
+        squares[position.getRow() - 1][position.getColumn() - 1] = null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
