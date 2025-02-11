@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Objects;
 /**
  * Key Methods:
 
@@ -17,11 +18,8 @@ isInStalemate: Returns true if the given team has no legal moves but their king 
  * signature of the existing methods.
  */
 public class ChessGame {
-
-    public ChessGame() {
-
-    }
     private TeamColor teamTurn;
+    
     private ChessBoard board = new ChessBoard();
 
     /**
@@ -79,8 +77,24 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessBoard board = getBoard();
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        if (piece == null) {
+            throw new InvalidMoveException("No piece at start position");
+        }
+        if (piece.getTeamColor() != teamTurn) {
+            throw new InvalidMoveException("Not your turn");
+        }
+        if (!validMoves(move.getStartPosition()).contains(move)) {
+            throw new InvalidMoveException("Invalid move");
+        }
+        // move the piece
+        board.addPiece(move.getEndPosition(), piece);
+        board.removePiece(move.getStartPosition());
+        // switch turns
+        teamTurn = teamTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
     }
+    
 
     /**
      * Determines if the given team is in check
@@ -124,7 +138,7 @@ public class ChessGame {
         // reset the board
         this.board.resetBoard();
         // set the team turn
-        this.teamTurn = TeamColor.WHITE;
+            setTeamTurn(TeamColor.WHITE);
     }
 
     /**
@@ -135,5 +149,18 @@ public class ChessGame {
     public ChessBoard getBoard() {
         // get the board
         return board;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessGame that = (ChessGame) o;
+        return Objects.equals(board, that.board) && teamTurn == that.teamTurn;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(board, teamTurn);
     }
 }
