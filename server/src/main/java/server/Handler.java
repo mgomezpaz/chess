@@ -188,7 +188,7 @@ public class Handler {
      * Joins an existing game
      */
     public Object joinGame(Request req, Response res) {
-        // set the response type to JSON
+        // set response type to JSON
         res.type("application/json");
         
         try {
@@ -213,19 +213,19 @@ public class Handler {
         } catch (UnauthorizedException e) {
             // not logged in
             res.status(401);
-            return gson.toJson(Map.of("message", e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (BadRequestException e) {
             // bad game ID or color
             res.status(400);
-            return gson.toJson(Map.of("message", e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (AlreadyTakenException e) {
             // color already taken
             res.status(403);
-            return gson.toJson(Map.of("message", e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (Exception e) {
             // other error
             res.status(500);
-            return gson.toJson(Map.of("message", "Server error: " + e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         }
     }
 
@@ -247,7 +247,7 @@ public class Handler {
         } catch (Exception e) {
             // something went wrong with the clearing
             res.status(500);
-            return gson.toJson(Map.of("message", "Failed to clear database: " + e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: Failed to clear database: " + e.getMessage()));
         }
     }
     
@@ -255,6 +255,6 @@ public class Handler {
     private String handleError(Response res, int status, String message) {
         res.status(status);
         res.type("application/json");
-        return gson.toJson(Map.of("message", message));
+        return gson.toJson(Map.of("message", "Error: " + message));
     }
 } 
