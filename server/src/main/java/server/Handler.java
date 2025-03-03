@@ -40,6 +40,9 @@ public class Handler {
      * Handles user registration
      */
     public Object register(Request req, Response res) {
+        // set response type to JSON
+        res.type("application/json");
+        
         try {
             // convert JSON to our request object
             RegisterRequest request = gson.fromJson(req.body(), RegisterRequest.class);
@@ -52,11 +55,11 @@ public class Handler {
         } catch (AlreadyTakenException e) {
             // username already exists
             res.status(403);
-            return gson.toJson(Map.of("message", e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (Exception e) {
             // something else went wrong
             res.status(500);
-            return gson.toJson(Map.of("message", "Server error: " + e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         }
     }
 
@@ -64,6 +67,9 @@ public class Handler {
      * Handles user login
      */
     public Object login(Request req, Response res) {
+        // set response type to JSON
+        res.type("application/json");
+        
         try {
             // parse the request body
             LoginRequest request = gson.fromJson(req.body(), LoginRequest.class);
@@ -88,6 +94,9 @@ public class Handler {
      * Handles user logout
      */
     public Object logout(Request req, Response res) {
+        // set response type to JSON
+        res.type("application/json");
+        
         try {
             // get the auth token from the request body
             LogoutRequest request = gson.fromJson(req.body(), LogoutRequest.class);
@@ -112,6 +121,9 @@ public class Handler {
      * Lists all the games
      */
     public Object listGames(Request req, Response res) {
+        // set response type to JSON
+        res.type("application/json");
+        
         try {
             // auth token comes from header
             String authToken = req.headers("Authorization");
@@ -139,6 +151,9 @@ public class Handler {
      * Creates a new game
      */
     public Object createGame(Request req, Response res) {
+        // set response type to JSON
+        res.type("application/json");
+        
         try {
             // need both auth token and game info
             String authToken = req.headers("Authorization");
@@ -173,6 +188,9 @@ public class Handler {
      * Joins an existing game
      */
     public Object joinGame(Request req, Response res) {
+        // set response type to JSON
+        res.type("application/json");
+        
         try {
             // need auth token and join info
             String authToken = req.headers("Authorization");
@@ -215,6 +233,9 @@ public class Handler {
      * Clears the database - DANGER ZONE!
      */
     public Object clear(Request req, Response res) {
+        // set response type to JSON
+        res.type("application/json");
+        
         try {
             // no auth needed for this one - it's just for testing
             
@@ -233,6 +254,7 @@ public class Handler {
     // Helper method to handle errors consistently - not used yet but might be useful later
     private String handleError(Response res, int status, String message) {
         res.status(status);
+        res.type("application/json");
         return gson.toJson(Map.of("message", message));
     }
 } 
