@@ -11,6 +11,7 @@ import request.RegisterRequest;
 import result.LoginResult;
 import result.LogoutResult;
 import result.RegisterResult;
+import exception.BadRequestException;
 
 import java.util.UUID;
 
@@ -31,7 +32,18 @@ public class UserService {
     /**
      * Signs up a new user
      */
-    public RegisterResult register(RegisterRequest request) throws DataAccessException, AlreadyTakenException {
+    public RegisterResult register(RegisterRequest request) throws DataAccessException, AlreadyTakenException, BadRequestException {
+        // validate request
+        if (request.username() == null || request.username().isEmpty()) {
+            throw new BadRequestException("Username cannot be empty");
+        }
+        if (request.password() == null || request.password().isEmpty()) {
+            throw new BadRequestException("Password cannot be empty");
+        }
+        if (request.email() == null || request.email().isEmpty()) {
+            throw new BadRequestException("Email cannot be empty");
+        }
+        
         // check if username is taken
         if (userDAO.getUser(request.username()) != null) {
             throw new AlreadyTakenException("Sorry, that username is taken");

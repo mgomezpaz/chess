@@ -52,6 +52,10 @@ public class Handler {
             
             // convert result back to JSON
             return gson.toJson(result);
+        } catch (BadRequestException e) {
+            // invalid request
+            res.status(400);
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (AlreadyTakenException e) {
             // username already exists
             res.status(403);
