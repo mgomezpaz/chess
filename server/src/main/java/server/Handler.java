@@ -67,7 +67,7 @@ public class Handler {
      * Handles user login
      */
     public Object login(Request req, Response res) {
-        // set response type to JSO
+        // set response type to JSON
         res.type("application/json");
         
         try {
@@ -82,11 +82,11 @@ public class Handler {
         } catch (UnauthorizedException e) {
             // bad credentials
             res.status(401);
-            return gson.toJson(Map.of("message", e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (Exception e) {
             // other error
             res.status(500);
-            return gson.toJson(Map.of("message", "Server error: " + e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         }
     }
 
@@ -109,11 +109,11 @@ public class Handler {
         } catch (UnauthorizedException e) {
             // not logged in or invalid token
             res.status(401);
-            return gson.toJson(Map.of("message", e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (Exception e) {
             // other error
             res.status(500);
-            return gson.toJson(Map.of("message", "Server error: " + e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         }
     }
 
@@ -121,7 +121,7 @@ public class Handler {
      * Lists all the games
      */
     public Object listGames(Request req, Response res) {
-        // set the response type to JSON 
+        // set response type to JSON
         res.type("application/json");
         
         try {
@@ -139,11 +139,11 @@ public class Handler {
         } catch (UnauthorizedException e) {
             // not logged in
             res.status(401);
-            return gson.toJson(Map.of("message", e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (Exception e) {
             // something broke
             res.status(500);
-            return gson.toJson(Map.of("message", "Server error: " + e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         }
     }
 
@@ -172,15 +172,15 @@ public class Handler {
         } catch (UnauthorizedException e) {
             // not logged in
             res.status(401);
-            return gson.toJson(Map.of("message", e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (BadRequestException e) {
             // bad game name probably
             res.status(400);
-            return gson.toJson(Map.of("message", e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (Exception e) {
             // other error
             res.status(500);
-            return gson.toJson(Map.of("message", "Server error: " + e.getMessage()));
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         }
     }
 
