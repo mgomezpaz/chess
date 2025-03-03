@@ -5,32 +5,32 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * In-memory implementation of the UserDAO interface
+ * Stores users in memory - will be replaced with database later
  */
 public class MemoryUserDAO implements UserDAO {
-    // just store users in a map for now
+    // just a simple map for now - username -> user data
     private final Map<String, UserData> users = new HashMap<>();
 
     @Override
     public void clear() throws DataAccessException {
-        // easy, just clear the map
+        // wipe all users
         users.clear();
     }
 
     @Override
     public void createUser(UserData user) throws DataAccessException {
-        // check if user already exists
+        // make sure we don't have duplicate usernames
         if (users.containsKey(user.username())) {
-            throw new DataAccessException("User already exists");
+            throw new DataAccessException("Username already exists");
         }
         
-        // add the user to our map
+        // add to our map
         users.put(user.username(), user);
     }
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
-        // just return the user from the map (might be null)
+        // might return null if user doesn't exist
         return users.get(username);
     }
 } 

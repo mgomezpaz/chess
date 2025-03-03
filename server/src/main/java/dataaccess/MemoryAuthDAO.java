@@ -7,39 +7,39 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * In-memory implementation of the AuthDAO interface
+ * Keeps track of auth tokens in memory
  */
 public class MemoryAuthDAO implements AuthDAO {
-    // store auth tokens in a map
+    // map of auth tokens -> auth data
     private final Map<String, AuthData> auths = new HashMap<>();
 
     @Override
     public void clear() throws DataAccessException {
-        // just clear the map
+        // bye bye tokens
         auths.clear();
     }
 
     @Override
     public void createAuth(AuthData auth) throws DataAccessException {
-        // add the auth to our map
+        // store the new token
         auths.put(auth.authToken(), auth);
     }
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
-        // return the auth from the map (might be null)
+        // null if token doesn't exist
         return auths.get(authToken);
     }
 
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
-        // remove the auth from the map
+        // remove on logout
         auths.remove(authToken);
     }
     
     @Override
     public List<AuthData> getAllAuthData() throws DataAccessException {
-        // return all the values as a list
+        // not sure if we'll need this but the interface wants it
         return new ArrayList<>(auths.values());
     }
 } 

@@ -4,41 +4,36 @@ import dataaccess.*;
 import result.ClearResult;
 
 /**
- * Service for clearing the database
+ * Wipes all data - mostly for testing
  */
 public class ClearService {
-    // need these to clear everything
+    // need access to all the data
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
     private final GameDAO gameDAO;
 
     public ClearService() {
-        // using our memory implementations
+        // memory implementations for phase 3
         this.userDAO = new MemoryUserDAO();
         this.authDAO = new MemoryAuthDAO();
         this.gameDAO = new MemoryGameDAO();
     }
 
     /**
-     * Clears all data from the database
+     * Nukes everything from orbit
      */
     public ClearResult clear() throws DataAccessException {
-        // wipe everything clean
         try {
-            // clear users first
+            // order doesn't really matter here
             userDAO.clear();
-            
-            // then auth tokens
             authDAO.clear();
-            
-            // and finally games
             gameDAO.clear();
             
-            // all good!
+            // all done
             return new ClearResult();
         } catch (Exception e) {
-            // something went wrong
-            throw new DataAccessException("Error clearing database: " + e.getMessage());
+            // oops
+            throw new DataAccessException("Failed to clear data: " + e.getMessage());
         }
     }
 } 
