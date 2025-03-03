@@ -3,8 +3,14 @@ package model;
 import chess.ChessGame;
 
 /**
- * Represents data for a chess game
+ * GameData
+ * 
+ * Field	Type
+ * gameID	int
+ * whiteUsername	String
+ * blackUsername	String
+ * gameName	String
+ * game	ChessGame
  */
 public record GameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
-    // Records automatically generate constructors, getters, equals, hashCode, and toString
 }

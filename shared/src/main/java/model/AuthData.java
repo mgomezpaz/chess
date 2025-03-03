@@ -1,8 +1,11 @@
 package model;
 
 /**
- * Represents authentication data with token and associated username
+ * AuthData
+
+ * Field	Type
+ * authToken	String
+ * username	String
  */
 public record AuthData(String authToken, String username) {
-    // Records automatically generate constructors, getters, equals, hashCode, and toString
 }
