@@ -15,57 +15,54 @@ import result.RegisterResult;
 import java.util.UUID;
 
 /**
- * Service class for user-related operations
+ * Handles user operations - register, login, logout
  */
 public class UserService {
+    // need these to access data
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
 
     public UserService() {
+        // TODO: maybe use dependency injection later?
         this.userDAO = new MemoryUserDAO();
         this.authDAO = new MemoryAuthDAO();
     }
 
     /**
-     * Registers a new user
-     * @param request the registration request
-     * @return the registration result
-     * @throws AlreadyTakenException if the username is already taken
-     * @throws DataAccessException if there is an error accessing the data store
+     * Signs up a new user
      */
     public RegisterResult register(RegisterRequest request) throws DataAccessException, AlreadyTakenException {
-        // Check if username already exists
+        // check if username is taken
         if (userDAO.getUser(request.username()) != null) {
-            throw new AlreadyTakenException("Username already taken");
+            throw new AlreadyTakenException("Sorry, that username is taken");
         }
 
-        // Create new user
+        // create the user
         UserData userData = new UserData(request.username(), request.password(), request.email());
         userDAO.createUser(userData);
 
-        // Generate auth token
+        // generate auth token - UUID is good enough for now
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, request.username());
         authDAO.createAuth(authData);
 
+        // send back the token
         return new RegisterResult(request.username(), authToken);
     }
 
     /**
-     * Logs in a user
-     * @param request the login request
-     * @return the login result
-     * @throws UnauthorizedException if the username or password is invalid
-     * @throws DataAccessException if there is an error accessing the data store
+     * Logs in an existing user
      */
     public LoginResult login(LoginRequest request) throws DataAccessException, UnauthorizedException {
-        // Get user data
+        // find the user
         UserData userData = userDAO.getUser(request.username());
+        
+        // validate credentials
         if (userData == null || !userData.password().equals(request.password())) {
             throw new UnauthorizedException("Invalid username or password");
         }
 
-        // Generate auth token
+        // create a fresh auth token
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, request.username());
         authDAO.createAuth(authData);
@@ -75,21 +72,18 @@ public class UserService {
 
     /**
      * Logs out a user
-     * @param request the logout request
-     * @return the logout result
-     * @throws UnauthorizedException if the auth token is invalid
-     * @throws DataAccessException if there is an error accessing the data store
      */
     public LogoutResult logout(LogoutRequest request) throws DataAccessException, UnauthorizedException {
-        // Verify auth token
+        // make sure token exists
         AuthData authData = authDAO.getAuth(request.authToken());
         if (authData == null) {
-            throw new UnauthorizedException("Invalid auth token");
+            throw new UnauthorizedException("You're not logged in");
         }
 
-        // Delete auth token
+        // delete the token
         authDAO.deleteAuth(request.authToken());
 
+        // nothing to return but success
         return new LogoutResult();
     }
 } 

@@ -1,5 +1,6 @@
 package dataaccess;
 
+import java.util.List;
 import model.AuthData;
 
 /**
@@ -8,6 +9,7 @@ import model.AuthData;
 public interface AuthDAO {
     /**
      * Clears all auth data from the database
+     * 
      * @throws DataAccessException if an error occurs
      */
     void clear() throws DataAccessException;
@@ -33,4 +35,12 @@ public interface AuthDAO {
      * @throws DataAccessException if an error occurs
      */
     void deleteAuth(String authToken) throws DataAccessException;
+
+    /**
+     * Retrieves all auth data from the database
+     * @return a list of all auth data
+     * @throws DataAccessException if an error occurs
+     */
+    List<AuthData> getAllAuthData() throws DataAccessException;
+
 } 
