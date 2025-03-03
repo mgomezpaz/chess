@@ -121,7 +121,7 @@ public class Handler {
      * Lists all the games
      */
     public Object listGames(Request req, Response res) {
-        // set response type to JSON
+        // set the response type to JSON 
         res.type("application/json");
         
         try {
