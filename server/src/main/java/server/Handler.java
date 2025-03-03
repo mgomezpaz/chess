@@ -188,7 +188,7 @@ public class Handler {
      * Joins an existing game
      */
     public Object joinGame(Request req, Response res) {
-        // set response type to JSON
+        // set the response type to JSON
         res.type("application/json");
         
         try {
