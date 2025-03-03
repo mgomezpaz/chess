@@ -17,7 +17,7 @@ public interface UserDAO {
      * @param userData the user to create
      * @throws DataAccessException if an error occurs or user already exists
      */
-    void createUser(UserData userData) throws DataAccessException;
+    void createUser(UserData userData) throws DataAccessException; 
 
     /**
      * Retrieves a user from the database
