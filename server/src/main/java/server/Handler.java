@@ -1,0 +1,238 @@
+package server;
+
+import com.google.gson.Gson;
+import exception.AlreadyTakenException;
+import exception.BadRequestException;
+import exception.UnauthorizedException;
+import request.*;
+import result.*;
+import service.ClearService;
+import service.GameService;
+import service.UserService;
+import spark.Request;
+import spark.Response;
+
+import java.util.Map;
+
+/**
+ * Handles all the HTTP requests for our server
+ */
+public class Handler {
+    // services we need
+    private final UserService userService;
+    private final GameService gameService;
+    private final ClearService clearService;
+    
+    // for JSON conversion
+    private final Gson gson;
+
+    public Handler() {
+        // create all the services we'll need
+        userService = new UserService();
+        gameService = new GameService();
+        clearService = new ClearService();
+        
+        // for converting to/from JSON
+        gson = new Gson();
+    }
+
+    /**
+     * Handles user registration
+     */
+    public Object register(Request req, Response res) {
+        try {
+            // convert JSON to our request object
+            RegisterRequest request = gson.fromJson(req.body(), RegisterRequest.class);
+            
+            // call the service
+            RegisterResult result = userService.register(request);
+            
+            // convert result back to JSON
+            return gson.toJson(result);
+        } catch (AlreadyTakenException e) {
+            // username already exists
+            res.status(403);
+            return gson.toJson(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            // something else went wrong
+            res.status(500);
+            return gson.toJson(Map.of("message", "Server error: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Handles user login
+     */
+    public Object login(Request req, Response res) {
+        try {
+            // parse the request body
+            LoginRequest request = gson.fromJson(req.body(), LoginRequest.class);
+            
+            // try to log in
+            LoginResult result = userService.login(request);
+            
+            // success!
+            return gson.toJson(result);
+        } catch (UnauthorizedException e) {
+            // bad credentials
+            res.status(401);
+            return gson.toJson(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            // other error
+            res.status(500);
+            return gson.toJson(Map.of("message", "Server error: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Handles user logout
+     */
+    public Object logout(Request req, Response res) {
+        try {
+            // get the auth token from the request body
+            LogoutRequest request = gson.fromJson(req.body(), LogoutRequest.class);
+            
+            // try to log out
+            LogoutResult result = userService.logout(request);
+            
+            // success
+            return gson.toJson(result);
+        } catch (UnauthorizedException e) {
+            // not logged in or invalid token
+            res.status(401);
+            return gson.toJson(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            // other error
+            res.status(500);
+            return gson.toJson(Map.of("message", "Server error: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Lists all the games
+     */
+    public Object listGames(Request req, Response res) {
+        try {
+            // auth token comes from header
+            String authToken = req.headers("Authorization");
+            
+            // create request with the token
+            ListGamesRequest request = new ListGamesRequest(authToken);
+            
+            // get the games
+            ListGamesResult result = gameService.listGames(request);
+            
+            // return the list
+            return gson.toJson(result);
+        } catch (UnauthorizedException e) {
+            // not logged in
+            res.status(401);
+            return gson.toJson(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            // something broke
+            res.status(500);
+            return gson.toJson(Map.of("message", "Server error: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Creates a new game
+     */
+    public Object createGame(Request req, Response res) {
+        try {
+            // need both auth token and game info
+            String authToken = req.headers("Authorization");
+            
+            // parse the body to get game name
+            CreateGameRequest bodyRequest = gson.fromJson(req.body(), CreateGameRequest.class);
+            
+            // combine into one request
+            CreateGameRequest request = new CreateGameRequest(authToken, bodyRequest.gameName());
+            
+            // create the game
+            CreateGameResult result = gameService.createGame(request);
+            
+            // return the new game ID
+            return gson.toJson(result);
+        } catch (UnauthorizedException e) {
+            // not logged in
+            res.status(401);
+            return gson.toJson(Map.of("message", e.getMessage()));
+        } catch (BadRequestException e) {
+            // bad game name probably
+            res.status(400);
+            return gson.toJson(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            // other error
+            res.status(500);
+            return gson.toJson(Map.of("message", "Server error: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Joins an existing game
+     */
+    public Object joinGame(Request req, Response res) {
+        try {
+            // need auth token and join info
+            String authToken = req.headers("Authorization");
+            
+            // parse body to get game ID and color
+            JoinGameRequest bodyRequest = gson.fromJson(req.body(), JoinGameRequest.class);
+            
+            // combine into one request
+            JoinGameRequest request = new JoinGameRequest(
+                authToken, 
+                bodyRequest.playerColor(), 
+                bodyRequest.gameID()
+            );
+            
+            // try to join
+            JoinGameResult result = gameService.joinGame(request);
+            
+            // success
+            return gson.toJson(result);
+        } catch (UnauthorizedException e) {
+            // not logged in
+            res.status(401);
+            return gson.toJson(Map.of("message", e.getMessage()));
+        } catch (BadRequestException e) {
+            // bad game ID or color
+            res.status(400);
+            return gson.toJson(Map.of("message", e.getMessage()));
+        } catch (AlreadyTakenException e) {
+            // color already taken
+            res.status(403);
+            return gson.toJson(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            // other error
+            res.status(500);
+            return gson.toJson(Map.of("message", "Server error: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Clears the database - DANGER ZONE!
+     */
+    public Object clear(Request req, Response res) {
+        try {
+            // no auth needed for this one - it's just for testing
+            
+            // nuke everything
+            ClearResult result = clearService.clear();
+            
+            // all gone!
+            return gson.toJson(result);
+        } catch (Exception e) {
+            // something went wrong with the clearing
+            res.status(500);
+            return gson.toJson(Map.of("message", "Failed to clear database: " + e.getMessage()));
+        }
+    }
+    
+    // Helper method to handle errors consistently - not used yet but might be useful later
+    private String handleError(Response res, int status, String message) {
+        res.status(status);
+        return gson.toJson(Map.of("message", message));
+    }
+} 
