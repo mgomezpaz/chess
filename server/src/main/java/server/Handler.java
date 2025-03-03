@@ -67,7 +67,7 @@ public class Handler {
      * Handles user login
      */
     public Object login(Request req, Response res) {
-        // set response type to JSON
+        // set response type to JSO
         res.type("application/json");
         
         try {
