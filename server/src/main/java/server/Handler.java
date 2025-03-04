@@ -102,14 +102,18 @@ public class Handler {
         res.type("application/json");
         
         try {
-            // get the auth token from the request body
-            LogoutRequest request = gson.fromJson(req.body(), LogoutRequest.class);
+            // get the auth token from the header instead of the body
+            String authToken = req.headers("Authorization");
+            
+            // create request with the token
+            LogoutRequest request = new LogoutRequest(authToken);
             
             // try to log out
             LogoutResult result = userService.logout(request);
             
             // success
             return gson.toJson(result);
+            
         } catch (UnauthorizedException e) {
             // not logged in or invalid token
             res.status(401);
