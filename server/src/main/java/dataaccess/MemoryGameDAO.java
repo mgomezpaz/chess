@@ -35,8 +35,8 @@ public class MemoryGameDAO implements GameDAO {
             int gameID = nextGameID++;
             
             String game = "{}"; 
-            String whiteUsername = "";
-            String blackUsername = "";
+            String whiteUsername = null;
+            String blackUsername = null;
             
             GameData gameData = new GameData(gameID, whiteUsername, blackUsername, gameName, game);
             games.put(gameID, gameData);
