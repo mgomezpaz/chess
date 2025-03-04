@@ -16,15 +16,15 @@ public interface PieceMovesCalculator {
             List<ChessMove> moves = new ArrayList<>();
             
             // get possible directions for the bishop
-            int[][] bishop_rules = {{1, 1}, {-1, 1}, {-1, -1}, {1, -1}};
+            int[][] bishopRules = {{1, 1}, {-1, 1}, {-1, -1}, {1, -1}};
             
-            for (int[] bishop_direction : bishop_rules) {
+            for (int[] bishopDirection : bishopRules) {
                 int row = position.getRow();
                 int col = position.getColumn();
                 
                 while (true) {
-                    row += bishop_direction[0];
-                    col += bishop_direction[1];
+                    row += bishopDirection[0];
+                    col += bishopDirection[1];
 
                     // make sure that the move is in the board
                     if (col < 1 || col > 8 || row < 1 || row > 8) {
@@ -61,15 +61,15 @@ public interface PieceMovesCalculator {
             List<ChessMove> moves = new ArrayList<>();
             
             // get possible directions for the king
-            int[][] king_rules = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}, {-1, -1}, {1, -1}};
+            int[][] kingRules = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}, {-1, -1}, {1, -1}};
             
-            for (int[] king_direction : king_rules) {
+            for (int[] kingDirection : kingRules) {
                 int row = position.getRow();
                 int col = position.getColumn();
                 
                 // calculate the new position
-                row += king_direction[0];
-                col += king_direction[1];
+                row += kingDirection[0];
+                col += kingDirection[1];
 
                 // make sure that the move is in the board, if not, get the next direction
                 if (col < 1 || col > 8 || row < 1 || row > 8) {
@@ -106,15 +106,15 @@ public interface PieceMovesCalculator {
             List<ChessMove> moves = new ArrayList<>();
 
             // get possible directions for the queen
-            int[][] queen_rules = {{1, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+            int[][] queenRules = {{1, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}};
             
-            for (int[] queen_direction : queen_rules) {
+            for (int[] queenDirection : queenRules) {
                 int row = position.getRow();
                 int col = position.getColumn();
                 
                 while (true) {
-                    row += queen_direction[0];
-                    col += queen_direction[1];
+                    row += queenDirection[0];
+                    col += queenDirection[1];
 
                     // make sure that the move is in the board
                     if (col < 1 || col > 8 || row < 1 || row > 8) {
@@ -153,15 +153,15 @@ public interface PieceMovesCalculator {
             List<ChessMove> moves = new ArrayList<>();
             
             // get possible directions for the knight
-            int[][] knight_rules = {{2, 1}, {2, -1}, {-2, 1}, {-2, -1}, {1, 2}, {1, -2}, {-1, 2}, {-1, -2}};
+            int[][] knightRules = {{2, 1}, {2, -1}, {-2, 1}, {-2, -1}, {1, 2}, {1, -2}, {-1, 2}, {-1, -2}};
             
-            for (int[] knight_direction : knight_rules) {
+            for (int[] knightDirection : knightRules) {
                 int row = position.getRow();
                 int col = position.getColumn();
                 
                 // calculate the new position
-                row += knight_direction[0];
-                col += knight_direction[1];
+                row += knightDirection[0];
+                col += knightDirection[1];
 
                 // make sure that the move is in the board, if not, get the next direction
                 if (col < 1 || col > 8 || row < 1 || row > 8) {
@@ -200,15 +200,15 @@ public interface PieceMovesCalculator {
             List<ChessMove> moves = new ArrayList<>();
 
             // get possible directions for the rook
-            int[][] rook_rules = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+            int[][] rookRules = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
             
-            for (int[] rook_direction : rook_rules) {
+            for (int[] rookDirection : rookRules) {
                 int row = position.getRow();
                 int col = position.getColumn();
                 
                 while (true) {
-                    row += rook_direction[0];
-                    col += rook_direction[1];
+                    row += rookDirection[0];
+                    col += rookDirection[1];
 
                     // make sure that the move is in the board
                     if (col < 1 || col > 8 || row < 1 || row > 8) {
@@ -253,28 +253,28 @@ public interface PieceMovesCalculator {
             
             // get the color of the pawn
             ChessGame.TeamColor color = board.getPiece(position).getTeamColor();
-            int starting_position = position.getRow();
+            int startingPosition = position.getRow();
 
             // initialize possible directions for the pawn
-            int[][] pawn_rules;
+            int[][] pawnRules;
 
             // load possible directions for white pawns
             if (color == ChessGame.TeamColor.WHITE) {
-                pawn_rules = new int[][]{{1, 0}, {1, 1}, {1, -1}, {2, 0}};
+                pawnRules = new int[][]{{1, 0}, {1, 1}, {1, -1}, {2, 0}};
             } 
             // load possible directions for black pawns
             else {  // must be BLACK
-                pawn_rules = new int[][]{{-1, 0}, {-1, 1}, {-1, -1}, {-2, 0}};
+                pawnRules = new int[][]{{-1, 0}, {-1, 1}, {-1, -1}, {-2, 0}};
             }
             
             // loop thorugh all possible directions
-            for (int[] pawn_direction : pawn_rules) {
+            for (int[] pawnDirection : pawnRules) {
 
                 // get current location and possible new position
                 int row = position.getRow();
                 int col = position.getColumn();
-                row += pawn_direction[0];
-                col += pawn_direction[1];
+                row += pawnDirection[0];
+                col += pawnDirection[1];
 
                 // make sure that the move is in the board (legal?)
                 if (col < 1 || col > 8 || row < 1 || row > 8) {
@@ -287,7 +287,7 @@ public interface PieceMovesCalculator {
 
     
                 // case 1: If moving forward by one
-                if (pawn_direction[1] == 0 && (pawn_direction[0] == 1 || pawn_direction[0] == -1)) {
+                if (pawnDirection[1] == 0 && (pawnDirection[0] == 1 || pawnDirection[0] == -1)) {
                     
                     // if the position is empty, it is a possible move
                     if (newPositionStatus == null) {
@@ -307,7 +307,7 @@ public interface PieceMovesCalculator {
                 }
 
                 // Case 2: If moving diagonally
-                if (pawn_direction[1] == 1 || pawn_direction[1] == -1) {
+                if (pawnDirection[1] == 1 || pawnDirection[1] == -1) {
                     
                     // Only move diagonal  if there's an enemy piece to capture
                     if (newPositionStatus != null && 
@@ -328,14 +328,14 @@ public interface PieceMovesCalculator {
                 }
 
                 // if moving by two
-                if (pawn_direction[1] == 0 && (pawn_direction[0] == 2 || pawn_direction[0] == -2)) {
+                if (pawnDirection[1] == 0 && (pawnDirection[0] == 2 || pawnDirection[0] == -2)) {
 
                     // Can only move two squares if path is clear
-                    if (((color == ChessGame.TeamColor.WHITE && starting_position == 2) || (color == ChessGame.TeamColor.BLACK && starting_position == 7)) && newPositionStatus == null) {
+                    if (((color == ChessGame.TeamColor.WHITE && startingPosition == 2) || (color == ChessGame.TeamColor.BLACK && startingPosition == 7)) && newPositionStatus == null) {
                         // make sure the path is not blocked
-                        int path_row = position.getRow() + (pawn_direction[0] / 2);
-                        ChessPosition path_position = new ChessPosition(path_row, col);
-                        if (board.getPiece(path_position) == null) {
+                        int pathRow = position.getRow() + (pawnDirection[0] / 2);
+                        ChessPosition pathPosition = new ChessPosition(pathRow, col);
+                        if (board.getPiece(pathPosition) == null) {
                             moves.add(new ChessMove(position, newPosition, null));
                         }
                     }
