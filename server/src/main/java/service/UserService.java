@@ -16,24 +16,25 @@ import exception.BadRequestException;
 import java.util.UUID;
 
 /**
- * Handles user operations - register, login, logout
+ * Handles all user-related operations
+ * This includes registration, login, and logout functionality
  */
 public class UserService {
-    // need these to access data
+    // Our data access objects
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
 
     public UserService() {
-        // TODO: maybe use dependency injection later?
-        this.userDAO = new MemoryUserDAO();
-        this.authDAO = new MemoryAuthDAO();
+        // Get the singleton instances to make sure we're all using the same data
+        this.userDAO = MemoryUserDAO.getInstance();
+        this.authDAO = MemoryAuthDAO.getInstance();
     }
 
     /**
-     * Signs up a new user
+     * Registers a new user in the system
      */
     public RegisterResult register(RegisterRequest request) throws DataAccessException, AlreadyTakenException, BadRequestException {
-        // validate request
+        // First, let's validate all the fields
         if (request.username() == null || request.username().isEmpty()) {
             throw new BadRequestException("Username cannot be empty");
         }
@@ -44,21 +45,21 @@ public class UserService {
             throw new BadRequestException("Email cannot be empty");
         }
         
-        // check if username is taken
+        // Make sure the username isn't already taken
         if (userDAO.getUser(request.username()) != null) {
             throw new AlreadyTakenException("Sorry, that username is taken");
         }
 
-        // create the user
+        // All good! Create the user
         UserData userData = new UserData(request.username(), request.password(), request.email());
         userDAO.createUser(userData);
 
-        // generate auth token - UUID is good enough for now
+        // Generate a random auth token using UUID
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, request.username());
         authDAO.createAuth(authData);
 
-        // send back the token
+        // Return the result with username and token
         return new RegisterResult(request.username(), authToken);
     }
 
@@ -66,36 +67,37 @@ public class UserService {
      * Logs in an existing user
      */
     public LoginResult login(LoginRequest request) throws DataAccessException, UnauthorizedException {
-        // find the user
+        // Try to find the user
         UserData userData = userDAO.getUser(request.username());
         
-        // validate credentials
+        // Check if user exists and password matches
         if (userData == null || !userData.password().equals(request.password())) {
             throw new UnauthorizedException("Invalid username or password");
         }
 
-        // create a fresh auth token
+        // User is valid, create a new auth token
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, request.username());
         authDAO.createAuth(authData);
 
+        // Return the result with username and new token
         return new LoginResult(request.username(), authToken);
     }
 
     /**
-     * Logs out a user
+     * Logs out a user by invalidating their auth token
      */
     public LogoutResult logout(LogoutRequest request) throws DataAccessException, UnauthorizedException {
-        // make sure token exists
+        // Check if the token is valid
         AuthData authData = authDAO.getAuth(request.authToken());
         if (authData == null) {
             throw new UnauthorizedException("You're not logged in");
         }
 
-        // delete the token
+        // Valid token, so delete it
         authDAO.deleteAuth(request.authToken());
 
-        // nothing to return but success
+        // Nothing to return for logout, just success
         return new LogoutResult();
     }
 } 

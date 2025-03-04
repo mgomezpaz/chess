@@ -4,35 +4,39 @@ import dataaccess.*;
 import result.ClearResult;
 
 /**
- * Wipes all data - mostly for testing
+ * Service for clearing all data
  */
 public class ClearService {
-    // need access to all the data
+    // We need access to all the DAOs to clear everything
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
     private final GameDAO gameDAO;
 
     public ClearService() {
-        // memory implementations for phase 3
-        this.userDAO = new MemoryUserDAO();
-        this.authDAO = new MemoryAuthDAO();
-        this.gameDAO = new MemoryGameDAO();
+        // Get the singleton instances of all our DAOs
+        // This ensures we're clearing the same data that other services are using
+        this.userDAO = MemoryUserDAO.getInstance();
+        this.authDAO = MemoryAuthDAO.getInstance();
+        this.gameDAO = MemoryGameDAO.getInstance();
     }
 
     /**
-     * Nukes everything from orbit
+     * Clears all data from the system - use with caution!
+     * As they say, "nuke it from orbit, it's the only way to be sure"
      */
     public ClearResult clear() throws DataAccessException {
         try {
-            // order doesn't really matter here
+            // Wipe everything clean
+            // The order doesn't really matter since we're in memory,
+            // but it might matter later with a real database (foreign keys, etc.)
             userDAO.clear();
             authDAO.clear();
             gameDAO.clear();
             
-            // all done
+            // All done - everything is gone!
             return new ClearResult();
         } catch (Exception e) {
-            // oops
+            // Something went wrong with the clearing process
             throw new DataAccessException("Failed to clear data: " + e.getMessage());
         }
     }

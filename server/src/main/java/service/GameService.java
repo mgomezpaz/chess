@@ -16,104 +16,107 @@ import result.ListGamesResult;
 import java.util.Collection;
 
 /**
- * Handles all game-related stuff
+ * Handles all game-related operations
+ * This includes creating games, joining games, and listing available games
  */
 public class GameService {
-    // data access
+    // Our data access objects
     private final GameDAO gameDAO;
     private final AuthDAO authDAO;
 
     public GameService() {
-        // memory implementations for now
-        this.gameDAO = new MemoryGameDAO();
-        this.authDAO = new MemoryAuthDAO();
+        // Get the singleton instances so we're all using the same data
+        this.gameDAO = MemoryGameDAO.getInstance();
+        this.authDAO = MemoryAuthDAO.getInstance();
     }
 
     /**
-     * Gets all the games
+     * Lists all available games in the system
      */
     public ListGamesResult listGames(ListGamesRequest request) throws DataAccessException, UnauthorizedException {
-        // check if user is logged in
+        // First, make sure the user is authenticated
         AuthData authData = authDAO.getAuth(request.authToken());
         if (authData == null) {
             throw new UnauthorizedException("Please log in first");
         }
 
-        // grab all games
+        // User is authenticated, so get all the games
         Collection<GameData> games = gameDAO.listGames();
         return new ListGamesResult(games);
     }
 
     /**
-     * Makes a new game
+     * Creates a new chess game
      */
     public CreateGameResult createGame(CreateGameRequest request) throws DataAccessException, UnauthorizedException, BadRequestException {
-        // check if user is logged in
+        // Check if the user is logged in
         AuthData authData = authDAO.getAuth(request.authToken());
         if (authData == null) {
             throw new UnauthorizedException("Please log in first");
         }
 
-        // make sure we have a name
+        // Validate the game name
         if (request.gameName() == null || request.gameName().isEmpty()) {
             throw new BadRequestException("Game needs a name");
         }
 
-        // create it
+        // All good, create the game
         int gameID = gameDAO.createGame(request.gameName());
         return new CreateGameResult(gameID);
     }
 
     /**
-     * Adds a player to a game
+     * Allows a user to join an existing game as either the white or black player
      */
     public JoinGameResult joinGame(JoinGameRequest request) throws DataAccessException, UnauthorizedException, BadRequestException, AlreadyTakenException {
-        // check if user is logged in
+        // First, check if the user is logged in
         AuthData authData = authDAO.getAuth(request.authToken());
         if (authData == null) {
             throw new UnauthorizedException("Please log in first");
         }
 
-        // make sure game exists
+        // Validate the game ID
         Integer gameID = request.gameID();
         if (gameID == null) {
             throw new BadRequestException("Game ID cannot be null");
         }
         
+        // Make sure the game exists
         GameData gameData = gameDAO.getGame(gameID);
         if (gameData == null) {
             throw new BadRequestException("Game doesn't exist");
         }
 
-        // get player info
+        // Get the player's info
         String username = authData.username();
         String color = request.playerColor();
         
-        // handle color choice
+        // Validate the color choice
         if (color == null || color.isEmpty()) {
             throw new BadRequestException("Color cannot be empty");
         }
         
+        // Handle the different color choices
         if (color.equals("WHITE")) {
-            // check if white is taken
+            // Check if white is already taken
             if (gameData.whiteUsername() != null && !gameData.whiteUsername().isEmpty()) {
                 throw new AlreadyTakenException("White is already taken");
             }
-            // add as white
+            // Add the player as white
             gameDAO.updateGame(gameID, username, "WHITE");
         } else if (color.equals("BLACK")) {
-            // check if black is taken
+            // Check if black is already taken
             if (gameData.blackUsername() != null && !gameData.blackUsername().isEmpty()) {
                 throw new AlreadyTakenException("Black is already taken");
             }
-            // add as black
+            // Add the player as black
             gameDAO.updateGame(gameID, username, "BLACK");
         } else {
-            // invalid color
+            // Invalid color specified
             throw new BadRequestException("Color must be WHITE or BLACK");
         }
 
-        // success
+        // Successfully joined the game
         return new JoinGameResult();
     }
 } 

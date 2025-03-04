@@ -5,32 +5,51 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Stores users in memory - will be replaced with database later
+ * In-memory implementation of UserDAO
  */
 public class MemoryUserDAO implements UserDAO {
-    // just a simple map for now - username -> user data
+    // Our singleton instance - we only want one of these!
+    private static MemoryUserDAO instance;
+    
+    // Simple username -> userData map
     private final Map<String, UserData> users = new HashMap<>();
+    
+    // Private constructor so nobody can create instances directly
+    private MemoryUserDAO() {
+        // Nothing to initialize here
+    }
+    
+    /**
+     * Get the singleton instance - creates it if it doesn't exist yet
+     */
+    public static synchronized MemoryUserDAO getInstance() {
+        if (instance == null) {
+            // First time this is called
+            instance = new MemoryUserDAO();
+        }
+        return instance;
+    }
 
     @Override
     public void clear() throws DataAccessException {
-        // wipe all users
+        // Start fresh - wipe all users
         users.clear();
     }
 
     @Override
     public void createUser(UserData user) throws DataAccessException {
-        // make sure we don't have duplicate usernames
+        // Don't allow duplicate usernames
         if (users.containsKey(user.username())) {
             throw new DataAccessException("Username already exists");
         }
         
-        // add to our map
+        // All good, add the user
         users.put(user.username(), user);
     }
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
-        // might return null if user doesn't exist
+        // Simple lookup - might be null if user doesn't exist
         return users.get(username);
     }
 } 
