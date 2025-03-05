@@ -1,12 +1,7 @@
 package model;
 
 /**
- * UserData
-
- * Field	Type
- * username	String
- * password	String
- * email	String
+ * Represents user data in the chess application
  */
 public record UserData(String username, String password, String email) {
 }

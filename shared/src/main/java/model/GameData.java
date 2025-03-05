@@ -3,14 +3,7 @@ package model;
 import chess.ChessGame;
 
 /**
- * GameData
- * 
- * Field	Type
- * gameID	int
- * whiteUsername	String
- * blackUsername	String
- * gameName	String
- * game	ChessGame
+ * Represents game data in the chess application
  */
 public record GameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
 }
