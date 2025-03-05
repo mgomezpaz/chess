@@ -185,18 +185,15 @@ public class Handler {
             return gson.toJson(result);
         } catch (UnauthorizedException e) {
             // Not logged in
-            res.status(401);
-            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
+            return handleError(res, 401, e.getMessage());
         } catch (BadRequestException e) {
-            // Bad game name
-            res.status(400);
-            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
+            // Bad game name or format
+            return handleError(res, 400, e.getMessage());
         } catch (Exception e) {
             // Something else went wrong
             System.err.println("Error creating game: " + e.getMessage());
             e.printStackTrace();
-            res.status(500);
-            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
+            return handleError(res, 500, e.getMessage());
         }
     }
     
