@@ -24,6 +24,11 @@ public class GameService {
     private final GameDAO gameDAO;
     private final AuthDAO authDAO;
 
+    public GameService(GameDAO gameDAO, AuthDAO authDAO) {
+        this.gameDAO = gameDAO;
+        this.authDAO = authDAO;
+    }
+
     public GameService() {
         // Get the singleton instances so we're all using the same data
         this.gameDAO = MemoryGameDAO.getInstance();

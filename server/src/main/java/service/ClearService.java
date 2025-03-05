@@ -12,6 +12,12 @@ public class ClearService {
     private final AuthDAO authDAO;
     private final GameDAO gameDAO;
 
+    public ClearService(UserDAO userDAO, AuthDAO authDAO, GameDAO gameDAO) {
+        this.userDAO = userDAO;
+        this.authDAO = authDAO;
+        this.gameDAO = gameDAO;
+    }
+
     public ClearService() {
         // Get the singleton instances of all our DAOs
         // This ensures we're clearing the same data that other services are using

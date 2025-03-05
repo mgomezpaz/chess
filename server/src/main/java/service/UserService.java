@@ -24,8 +24,14 @@ public class UserService {
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
 
+    // Add this constructor to match what your test is using
+    public UserService(UserDAO userDAO, AuthDAO authDAO) {
+        this.userDAO = userDAO;
+        this.authDAO = authDAO;
+    }
+
+    // No-arg constructor that uses the default DAOs
     public UserService() {
-        // Get the singleton instances to make sure we're all using the same data
         this.userDAO = MemoryUserDAO.getInstance();
         this.authDAO = MemoryAuthDAO.getInstance();
     }

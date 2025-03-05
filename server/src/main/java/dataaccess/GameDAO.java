@@ -2,6 +2,7 @@ package dataaccess;
 
 import model.GameData;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Interface for Game data access operations
@@ -31,10 +32,10 @@ public interface GameDAO {
 
     /**
      * Lists all games in the database
-     * @return a collection of all games
+     * @return a list of all games
      * @throws DataAccessException if an error occurs
      */
-    Collection<GameData> listGames() throws DataAccessException;
+    List<GameData> listGames() throws DataAccessException;
 
     /**
      * Updates a game in the database

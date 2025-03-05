@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 /**
  * Stores chess games in memory
@@ -55,7 +56,7 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public Collection<GameData> listGames() throws DataAccessException {
+    public List<GameData> listGames() throws DataAccessException {
         return new ArrayList<>(games.values());
     }
 

@@ -15,6 +15,7 @@ import result.CreateGameResult;
 import result.JoinGameResult;
 import result.ListGamesResult;
 import result.RegisterResult;
+import dataaccess.*;
 
 import java.util.Collection;
 
@@ -29,10 +30,15 @@ public class GameServiceTest {
     
     @BeforeEach
     public void setup() throws Exception {
+        // Get DAO instances
+        UserDAO userDAO = MemoryUserDAO.getInstance();
+        AuthDAO authDAO = MemoryAuthDAO.getInstance();
+        GameDAO gameDAO = MemoryGameDAO.getInstance();
+        
         // Fresh instances for each test
-        gameService = new GameService();
-        userService = new UserService();
-        clearService = new ClearService();
+        gameService = new GameService(gameDAO, authDAO);
+        userService = new UserService(userDAO, authDAO);
+        clearService = new ClearService(userDAO, authDAO, gameDAO);
         
         // Start with a clean slate
         clearService.clear();
