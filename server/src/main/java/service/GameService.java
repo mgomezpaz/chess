@@ -118,7 +118,12 @@ public class GameService {
             gameDAO.updateGame(gameID, username, "BLACK");
         } else {
             // Invalid color specified
-            throw new BadRequestException("Color must be WHITE or BLACK");
+            String errorMsg = String.format(
+                "Invalid player color. Must be WHITE or BLACK, but got: %s. Game ID: %d",
+                request.playerColor(),
+                request.gameID()
+            );
+            throw new BadRequestException(errorMsg);
         }
 
         // Successfully joined the game
