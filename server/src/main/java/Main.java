@@ -10,7 +10,7 @@ public class Main {
      */
     public static void main(String[] args) {
         // Default port
-        int port = 8080;
+        int port = 8082;
         
         // Use command line argument for port if provided
         if (args.length > 0) {
@@ -25,6 +25,6 @@ public class Main {
         Server server = new Server();
         server.run(port);
         
-        System.out.println("Chess server running at http://localhost:" + port);
+        System.out.println("Lets play some chess! Chess server at http://localhost:" + port);
     }
 }
