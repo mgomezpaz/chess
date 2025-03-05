@@ -1,6 +1,7 @@
 package dataaccess;
 
 import model.GameData;
+import chess.ChessGame;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,7 +35,8 @@ public class MemoryGameDAO implements GameDAO {
         try {
             int gameID = nextGameID++;
             
-            String game = "{}"; 
+            // Create a new chess game with default setup
+            ChessGame game = new ChessGame(); 
             String whiteUsername = null;
             String blackUsername = null;
             

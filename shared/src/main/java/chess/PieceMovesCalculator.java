@@ -331,7 +331,9 @@ public interface PieceMovesCalculator {
                 if (pawnDirection[1] == 0 && (pawnDirection[0] == 2 || pawnDirection[0] == -2)) {
 
                     // Can only move two squares if path is clear
-                    if (((color == ChessGame.TeamColor.WHITE && startingPosition == 2) || (color == ChessGame.TeamColor.BLACK && startingPosition == 7)) && newPositionStatus == null) {
+                    if (((color == ChessGame.TeamColor.WHITE && startingPosition == 2) || 
+                         (color == ChessGame.TeamColor.BLACK && startingPosition == 7)) && 
+                        newPositionStatus == null) {
                         // make sure the path is not blocked
                         int pathRow = position.getRow() + (pawnDirection[0] / 2);
                         ChessPosition pathPosition = new ChessPosition(pathRow, col);

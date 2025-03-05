@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -284,5 +285,102 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return this.board;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return board.equals(chessGame.board) && teamTurn == chessGame.teamTurn;
+    }
+
+    // Extract duplicated code into a helper method
+    private boolean isValidMove(ChessMove move, TeamColor teamColor) {
+        // Create a copy of the board to test the move
+        ChessBoard tempBoard = board.copyBoard();
+        
+        // Make the move on the temporary board
+        tempBoard.addPiece(move.getEndPosition(), tempBoard.getPiece(move.getStartPosition()));
+        tempBoard.addPiece(move.getStartPosition(), null);
+        
+        // Check if the king is in check after the move
+        return !isInCheckAfterMove(tempBoard, teamColor);
+    }
+
+    private boolean isInCheckAfterMove(ChessBoard board, TeamColor teamColor) {
+        // Find the king's position
+        ChessPosition kingPosition = findKingPosition(board, teamColor);
+        
+        // Check if any opponent piece can attack the king
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(position);
+                
+                if (piece != null && piece.getTeamColor() != teamColor) {
+                    Collection<ChessMove> pieceMoves = piece.pieceMoves(board, position);
+                    for (ChessMove pieceMove : pieceMoves) {
+                        if (pieceMove.getEndPosition().equals(kingPosition)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    // Refactor deeply nested code by extracting methods
+    private boolean canTeamMakeValidMove(TeamColor teamColor) {
+        // Get all pieces of the team
+        List<PiecePosition> teamPieces = getTeamPieces(teamColor);
+        
+        // Check if any piece can make a valid move
+        for (PiecePosition piecePosition : teamPieces) {
+            if (canPieceMakeValidMove(piecePosition.piece, piecePosition.position, teamColor)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean canPieceMakeValidMove(ChessPiece piece, ChessPosition position, TeamColor teamColor) {
+        Collection<ChessMove> pieceMoves = piece.pieceMoves(board, position);
+        for (ChessMove move : pieceMoves) {
+            if (isValidMove(move, teamColor)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<PiecePosition> getTeamPieces(TeamColor teamColor) {
+        List<PiecePosition> teamPieces = new ArrayList<>();
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    teamPieces.add(new PiecePosition(piece, position));
+                }
+            }
+        }
+        return teamPieces;
+    }
+
+    // Helper class to store piece and position together
+    private static class PiecePosition {
+        ChessPiece piece;
+        ChessPosition position;
+        
+        PiecePosition(ChessPiece piece, ChessPosition position) {
+            this.piece = piece;
+            this.position = position;
+        }
     }
 }

@@ -16,7 +16,7 @@ public class Server {
         // for the web files
         Spark.staticFiles.location("web");
 
-        // TODO: maybe add more error handling later?
+        // maybe add more error handling later?
         
         // all the endpoints we need for the chess server
         // register

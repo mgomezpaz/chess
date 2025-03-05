@@ -90,8 +90,12 @@ public class ChessBoard {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ChessBoard that = (ChessBoard) o;
         
         // Compare every square
@@ -117,5 +121,20 @@ public class ChessBoard {
             }
         }
         return result;
+    }
+
+    private boolean areBoardsEqual(ChessBoard other) {
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                if (this.getPiece(new ChessPosition(i, j)) == null) {
+                    if (other.getPiece(new ChessPosition(i, j)) != null) {
+                        return false;
+                    }
+                } else if (!this.getPiece(new ChessPosition(i, j)).equals(other.getPiece(new ChessPosition(i, j)))) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
