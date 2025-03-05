@@ -15,146 +15,147 @@ import spark.Response;
 import java.util.Map;
 
 /**
- * Handles all the HTTP requests for our server
+ * Handles all the HTTP requests for our chess server.
+ * This is where the HTTP layer meets our service layer.
  */
 public class Handler {
-    // services we need
+    // Services that do the real work
     private final UserService userService;
     private final GameService gameService;
     private final ClearService clearService;
     
-    // for JSON conversion
+    // For JSON conversion
     private final Gson gson;
-
+    
+    /**
+     * Creates a new handler with all the services it needs
+     */
     public Handler() {
-        // create all the services we'll need
+        // Create our services
         userService = new UserService();
         gameService = new GameService();
         clearService = new ClearService();
         
-        // for converting to/from JSON
+        // Set up Gson for JSON conversion
         gson = new Gson();
     }
-
+    
     /**
-     * Handles user registration
+     * Registers a new user
      */
     public Object register(Request req, Response res) {
-        // set response type to JSON
+        // Always return JSON
         res.type("application/json");
         
         try {
-            // convert JSON to our request object
+            // Parse the request body into our DTO
             RegisterRequest request = gson.fromJson(req.body(), RegisterRequest.class);
             
-            // call the service
+            // Let the service handle the registration logic
             RegisterResult result = userService.register(request);
             
-            // convert result back to JSON
+            // Convert the result back to JSON and return it
             return gson.toJson(result);
         } catch (BadRequestException e) {
-            // invalid request
+            // Missing required fields
             res.status(400);
             return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (AlreadyTakenException e) {
-            // username already exists
+            // Username already exists
             res.status(403);
             return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (Exception e) {
-            // something else went wrong
+            // Something else went wrong
             res.status(500);
             return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         }
     }
-
+    
     /**
-     * Handles user login
+     * Logs in an existing user
      */
     public Object login(Request req, Response res) {
-        // set response type to JSON
+        // JSON response
         res.type("application/json");
         
         try {
-            // parse the request body
+            // Get login info from the request body
             LoginRequest request = gson.fromJson(req.body(), LoginRequest.class);
             
-            // try to log in
+            // Try to log in
             LoginResult result = userService.login(request);
             
-            // success!
+            // Success! Return the auth token
             return gson.toJson(result);
         } catch (UnauthorizedException e) {
-            // bad credentials
+            // Bad credentials
             res.status(401);
             return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (Exception e) {
-            // other error
+            // Other error
             res.status(500);
             return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         }
     }
-
+    
     /**
-     * Handles user logout
+     * Logs out a user
      */
     public Object logout(Request req, Response res) {
-        // set response type to JSON
         res.type("application/json");
         
         try {
-            // get the auth token from the header instead of the body
+            // Auth token comes from the header
             String authToken = req.headers("Authorization");
             
-            // create request with the token
+            // Create the request object
             LogoutRequest request = new LogoutRequest(authToken);
             
-            // try to log out
+            // Try to log out
             LogoutResult result = userService.logout(request);
             
-            // success
+            // All good!
             return gson.toJson(result);
-            
         } catch (UnauthorizedException e) {
-            // not logged in or invalid token
+            // Not logged in or bad token
             res.status(401);
             return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (Exception e) {
-            // other error
+            // Something else broke
             res.status(500);
             return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         }
     }
-
+    
     /**
-     * Lists all the games
+     * Gets a list of all games
      */
     public Object listGames(Request req, Response res) {
-        // set response type to JSON
         res.type("application/json");
         
         try {
-            // auth token comes from header
+            // Need the auth token from the header
             String authToken = req.headers("Authorization");
             
-            // create request with the token
+            // Create the request
             ListGamesRequest request = new ListGamesRequest(authToken);
             
-            // get the games
+            // Get the games from the service
             ListGamesResult result = gameService.listGames(request);
             
-            // return the list
+            // Return the list as JSON
             return gson.toJson(result);
         } catch (UnauthorizedException e) {
-            // not logged in
+            // Not logged in
             res.status(401);
             return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (Exception e) {
-            // something broke
+            // Other error
             res.status(500);
             return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         }
     }
-
+    
     /**
      * Creates a new game
      */
@@ -162,111 +163,134 @@ public class Handler {
         res.type("application/json");
         
         try {
-            // Check if we have an unwrapped body
+            // Check for unwrapped body from our middleware
             String requestBody = req.attribute("unwrappedBody");
             if (requestBody == null) {
-                // If not, use the regular body
                 requestBody = req.body();
             }
             
-            // Parse the body
+            // Get auth token from header
+            String authToken = req.headers("Authorization");
+            
+            // Parse the game name from the body
             CreateGameRequest bodyRequest = gson.fromJson(requestBody, CreateGameRequest.class);
             
-            // Rest of your handler code...
+            // Build the full request
+            CreateGameRequest request = new CreateGameRequest(authToken, bodyRequest.gameName());
+            
+            // Let the service create the game
+            CreateGameResult result = gameService.createGame(request);
+            
+            // Return the game ID
+            return gson.toJson(result);
+        } catch (UnauthorizedException e) {
+            // Not logged in
+            res.status(401);
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
+        } catch (BadRequestException e) {
+            // Bad game name
+            res.status(400);
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (Exception e) {
-            // Error handling...
+            // Something else went wrong
+            System.err.println("Error creating game: " + e.getMessage());
+            e.printStackTrace();
+            res.status(500);
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         }
     }
-
+    
     /**
      * Joins an existing game
      */
     public Object joinGame(Request req, Response res) {
-        // set response type to JSON
         res.type("application/json");
         
         try {
-            // need auth token and join info
+            // Get auth token from header
             String authToken = req.headers("Authorization");
             
-            // parse body to get game ID and color
-            JoinGameRequest bodyRequest = gson.fromJson(req.body(), JoinGameRequest.class);
+            // Check for unwrapped body
+            String requestBody = req.attribute("unwrappedBody");
+            if (requestBody == null) {
+                requestBody = req.body();
+            }
             
-            // combine into one request
+            // Parse the join info
+            JoinGameRequest bodyRequest = gson.fromJson(requestBody, JoinGameRequest.class);
+            
+            // Build the full request
             JoinGameRequest request = new JoinGameRequest(
                 authToken, 
                 bodyRequest.playerColor(), 
                 bodyRequest.gameID()
             );
             
-            // try to join
+            // Try to join
             JoinGameResult result = gameService.joinGame(request);
             
-            // success
+            // Success!
             return gson.toJson(result);
         } catch (UnauthorizedException e) {
-            // not logged in
+            // Not logged in
             res.status(401);
             return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (BadRequestException e) {
-            // bad game ID or color
+            // Bad game ID or color
             res.status(400);
             return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (AlreadyTakenException e) {
-            // color already taken
+            // Color already taken
             res.status(403);
             return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         } catch (Exception e) {
-            // other error
+            // Other error
             res.status(500);
             return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         }
     }
-
+    
     /**
-     * Clears the database - DANGER ZONE!
+     * Clears the database - use with caution!
      */
     public Object clear(Request req, Response res) {
-        // set response type to JSON
         res.type("application/json");
         
         try {
-            // no auth needed for this one - it's just for testing
+            // No auth needed - this is just for testing
             
-            // nuke everything
+            // Delete everything
             ClearResult result = clearService.clear();
             
-            // all gone!
+            // All gone!
             return gson.toJson(result);
         } catch (Exception e) {
-            // something went wrong with the clearing
+            // Something went wrong
             res.status(500);
             return gson.toJson(Map.of("message", "Error: Failed to clear database: " + e.getMessage()));
         }
     }
     
-    // Helper method to handle errors consistently - not used yet but might be useful later
+    // Helper for consistent error responses
     private String handleError(Response res, int status, String message) {
         res.status(status);
         res.type("application/json");
         return gson.toJson(Map.of("message", "Error: " + message));
     }
-
+    
     /**
-     * Helper method to parse request bodies that might be JSON strings
+     * Parses request bodies that might be JSON strings
      */
     private <T> T parseRequestBody(String body, Class<T> type) throws BadRequestException {
         try {
-            // First try to parse it directly
+            // First try parsing directly
             return gson.fromJson(body, type);
         } catch (Exception e) {
-            // If that fails, it might be a JSON string that needs to be parsed again
+            // If that fails, try unwrapping quotes
             try {
-                // Remove quotes if the string is wrapped in quotes
                 if (body.startsWith("\"") && body.endsWith("\"")) {
                     body = body.substring(1, body.length() - 1);
                 }
-                // Try to parse the unwrapped string
                 return gson.fromJson(body, type);
             } catch (Exception e2) {
                 throw new BadRequestException("Invalid request format: " + body);
