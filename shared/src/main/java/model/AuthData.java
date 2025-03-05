@@ -1,11 +1,7 @@
 package model;
 
 /**
- * AuthData
-
- * Field	Type
- * authToken	String
- * username	String
+ * Represents authentication data in the chess application
  */
 public record AuthData(String authToken, String username) {
 }

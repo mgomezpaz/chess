@@ -8,16 +8,9 @@ import model.AuthData;
  */
 public interface AuthDAO {
     /**
-     * Clears all auth data from the database
-     * 
-     * @throws DataAccessException if an error occurs
-     */
-    void clear() throws DataAccessException;
-
-    /**
-     * Creates a new auth token in the database
-     * @param authData the auth data to create
-     * @throws DataAccessException if an error occurs
+     * Creates a new authentication token in the database
+     * @param authData the authentication data to create
+     * @throws DataAccessException if there is an error creating the auth token
      */
     void createAuth(AuthData authData) throws DataAccessException;
 
@@ -37,10 +30,15 @@ public interface AuthDAO {
     void deleteAuth(String authToken) throws DataAccessException;
 
     /**
+     * Clears all authentication tokens from the database
+     * @throws DataAccessException if there is an error clearing auth tokens
+     */
+    void clear() throws DataAccessException;
+
+    /**
      * Retrieves all auth data from the database
      * @return a list of all auth data
      * @throws DataAccessException if an error occurs
      */
     List<AuthData> getAllAuthData() throws DataAccessException;
-
 } 
