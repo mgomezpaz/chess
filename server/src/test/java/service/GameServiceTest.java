@@ -16,6 +16,7 @@ import result.JoinGameResult;
 import result.ListGamesResult;
 import result.RegisterResult;
 import dataaccess.*;
+import chess.ChessGame;
 
 import java.util.Collection;
 

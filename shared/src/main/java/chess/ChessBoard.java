@@ -84,6 +84,9 @@ public class ChessBoard {
         return newBoard;
     }
 
+    /**
+     * Removes a piece from the position.
+     */
     public void removePiece(ChessPosition position) {
         squares[position.getRow() - 1][position.getColumn() - 1] = null;
     }
@@ -104,8 +107,12 @@ public class ChessBoard {
                 ChessPiece thisPiece = squares[i][j];
                 ChessPiece thatPiece = that.squares[i][j];
                 
-                if ((thisPiece == null) != (thatPiece == null)) return false;
-                if (thisPiece != null && !thisPiece.equals(thatPiece)) return false;
+                if ((thisPiece == null) != (thatPiece == null)) {
+                    return false;
+                }
+                if (thisPiece != null && !thisPiece.equals(thatPiece)) {
+                    return false;
+                }
             }
         }
         return true;
@@ -123,6 +130,10 @@ public class ChessBoard {
         return result;
     }
 
+    /**
+     * Compares two chess boards for equality.
+     * Useful for testing and validation, though not currently used in game logic.
+     */
     private boolean areBoardsEqual(ChessBoard other) {
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
