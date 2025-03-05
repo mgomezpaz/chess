@@ -159,36 +159,22 @@ public class Handler {
      * Creates a new game
      */
     public Object createGame(Request req, Response res) {
-        // set response type to JSON
         res.type("application/json");
         
         try {
-            // need both auth token and game info
-            String authToken = req.headers("Authorization");
+            // Check if we have an unwrapped body
+            String requestBody = req.attribute("unwrappedBody");
+            if (requestBody == null) {
+                // If not, use the regular body
+                requestBody = req.body();
+            }
             
-            // parse the body to get game name
-            CreateGameRequest bodyRequest = gson.fromJson(req.body(), CreateGameRequest.class);
+            // Parse the body
+            CreateGameRequest bodyRequest = gson.fromJson(requestBody, CreateGameRequest.class);
             
-            // combine into one request
-            CreateGameRequest request = new CreateGameRequest(authToken, bodyRequest.gameName());
-            
-            // create the game
-            CreateGameResult result = gameService.createGame(request);
-            
-            // return the new game ID
-            return gson.toJson(result);
-        } catch (UnauthorizedException e) {
-            // not logged in
-            res.status(401);
-            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
-        } catch (BadRequestException e) {
-            // bad game name probably
-            res.status(400);
-            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
+            // Rest of your handler code...
         } catch (Exception e) {
-            // other error
-            res.status(500);
-            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
+            // Error handling...
         }
     }
 
@@ -264,5 +250,27 @@ public class Handler {
         res.status(status);
         res.type("application/json");
         return gson.toJson(Map.of("message", "Error: " + message));
+    }
+
+    /**
+     * Helper method to parse request bodies that might be JSON strings
+     */
+    private <T> T parseRequestBody(String body, Class<T> type) throws BadRequestException {
+        try {
+            // First try to parse it directly
+            return gson.fromJson(body, type);
+        } catch (Exception e) {
+            // If that fails, it might be a JSON string that needs to be parsed again
+            try {
+                // Remove quotes if the string is wrapped in quotes
+                if (body.startsWith("\"") && body.endsWith("\"")) {
+                    body = body.substring(1, body.length() - 1);
+                }
+                // Try to parse the unwrapped string
+                return gson.fromJson(body, type);
+            } catch (Exception e2) {
+                throw new BadRequestException("Invalid request format: " + body);
+            }
+        }
     }
 } 

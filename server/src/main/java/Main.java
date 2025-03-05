@@ -9,11 +9,22 @@ public class Main {
      * @param args command line arguments
      */
     public static void main(String[] args) {
-        // Create a new server
-        Server server = new Server();
-        // Run the server on port 8080
-        server.run(8080);
+        // Default port
+        int port = 8080;
         
-        System.out.println("Server started on port 8080");
+        // Use command line argument for port if provided
+        if (args.length > 0) {
+            try {
+                port = Integer.parseInt(args[0]);
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid port number. Using default port 8080.");
+            }
+        }
+        
+        // Create and start the server
+        Server server = new Server();
+        server.run(port);
+        
+        System.out.println("Chess server running at http://localhost:" + port);
     }
 }
