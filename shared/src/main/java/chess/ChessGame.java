@@ -383,4 +383,20 @@ public class ChessGame {
             this.position = position;
         }
     }
+
+    private ChessPosition findKingPosition(ChessBoard board, TeamColor teamColor) {
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+                
+                if (piece != null && 
+                    piece.getTeamColor() == teamColor && 
+                    piece.getPieceType() == ChessPiece.PieceType.KING) {
+                    return position;
+                }
+            }
+        }
+        throw new RuntimeException("King not found on the board");
+    }
 }

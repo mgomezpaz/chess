@@ -70,18 +70,18 @@ public class ChessBoard {
         squares[0][7] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);   // r
     }
 
-    public void copyBoard(ChessBoard board) {
+    public ChessBoard copyBoard() {
+        ChessBoard newBoard = new ChessBoard();
         for (int row = 1; row <= 8; row++) {
             for (int col = 1; col <= 8; col++) {
                 ChessPosition position = new ChessPosition(row, col);
-                ChessPiece piece = board.getPiece(position);
+                ChessPiece piece = this.getPiece(position);
                 if (piece != null) {
-                    squares[row-1][col-1] = new ChessPiece(piece.getTeamColor(), piece.getPieceType());
-                } else {
-                    squares[row-1][col-1] = null;
+                    newBoard.addPiece(position, new ChessPiece(piece.getTeamColor(), piece.getPieceType()));
                 }
             }
         }
+        return newBoard;
     }
 
     public void removePiece(ChessPosition position) {
