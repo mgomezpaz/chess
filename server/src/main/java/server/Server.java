@@ -3,129 +3,120 @@ package server;
 import spark.*;
 
 /**
- * This class manages the web server and registers all endpoints for the chess application.
+ * The main server class for our chess application.
+ * Sets up all the HTTP endpoints and middleware.
  */
 public class Server {
+    // Our request handler
     private final Handler handler;
-
+    
     /**
-     * Creates a new server instance and initializes the handler.
+     * Creates a new server instance
      */
     public Server() {
-        // Create a new handler for all the endpoints
-        this.handler = new Handler();
+        // Create the handler that will process all our requests
+        handler = new Handler();
     }
-
+    
     /**
-     * Runs the server on the specified port.
-     * 
-     * @param desiredPort The port to run the server on
-     * @return The actual port the server is running on
+     * Starts the server on the specified port
      */
     public int run(int desiredPort) {
-        // Set the port
+        // Tell Spark which port to use
         Spark.port(desiredPort);
-
-        // Configure static files location for web interface
+        
+        // Set up the directory for static web files
         Spark.staticFiles.location("web");
-
-        // Create a filter that wraps the original request with a custom implementation
-        Spark.before((request, response) -> {
-            if ((request.requestMethod().equals("POST") || request.requestMethod().equals("PUT")) 
-                    && request.contentType() != null 
-                    && request.contentType().contains("application/json")) {
+        
+        // Add middleware to handle JSON string unwrapping
+        // This helps with some clients that double-encode JSON
+        Spark.before((req, res) -> {
+            if ((req.requestMethod().equals("POST") || req.requestMethod().equals("PUT")) 
+                    && req.contentType() != null 
+                    && req.contentType().contains("application/json")) {
                 
-                String body = request.body();
+                String body = req.body();
+                // If the body is wrapped in quotes, unwrap it
                 if (body.startsWith("\"") && body.endsWith("\"")) {
                     try {
-                        // Unwrap the JSON string
                         String unwrapped = body.substring(1, body.length() - 1)
                                 .replace("\\\"", "\"")
                                 .replace("\\\\", "\\");
                         
-                        // Store the unwrapped body for later use
-                        request.attribute("unwrappedBody", unwrapped);
+                        // Store it for handlers to use
+                        req.attribute("unwrappedBody", unwrapped);
                     } catch (Exception e) {
-                        System.err.println("Error unwrapping JSON string: " + e.getMessage());
+                        System.err.println("Error unwrapping JSON: " + e.getMessage());
                     }
                 }
             }
         });
-
-        // Add debug logging for development (comment out for production)
+        
+        // Log all requests - helpful for debugging
         Spark.before((req, res) -> {
-            System.out.println("Received " + req.requestMethod() + " request to " + req.pathInfo());
-            if (req.contentType() != null) {
-                System.out.println("Content-Type: " + req.contentType());
-            }
+            System.out.println(req.requestMethod() + " " + req.pathInfo());
             if (req.body() != null && !req.body().isEmpty()) {
                 System.out.println("Body: " + req.body());
             }
         });
-
-        // Register all the endpoints for the chess server
         
-        // User management endpoints
-        Spark.post("/user", handler::register);      // Register a new user
+        // Register all our endpoints
+        
+        // User endpoints
+        Spark.post("/user", handler::register);      // Register
         Spark.post("/session", handler::login);      // Login
         Spark.delete("/session", handler::logout);   // Logout
         
-        // Game management endpoints
-        Spark.get("/game", handler::listGames);      // List all games
-        Spark.post("/game", handler::createGame);    // Create a new game
-        Spark.put("/game", handler::joinGame);       // Join an existing game
+        // Game endpoints
+        Spark.get("/game", handler::listGames);      // List games
+        Spark.post("/game", handler::createGame);    // Create game
+        Spark.put("/game", handler::joinGame);       // Join game
         
-        // Database management endpoint (for testing)
-        Spark.delete("/db", handler::clear);         // Clear the database
+        // Admin endpoint
+        Spark.delete("/db", handler::clear);         // Clear DB
         
-        // Add exception handling for internal server errors
+        // Global error handler
         Spark.exception(Exception.class, (e, req, res) -> {
             res.status(500);
             res.type("application/json");
-            res.body("{\"message\": \"Error: Internal server error: " + e.getMessage() + "\"}");
+            res.body("{\"message\": \"Error: Server error: " + e.getMessage() + "\"}");
             e.printStackTrace();
         });
-
-        // Initialize the server
+        
+        // Start the server
         Spark.init();
-
-        // Wait until the server is fully initialized
+        
+        // Wait for server to be ready
         Spark.awaitInitialization();
         
-        // Log that the server has started
+        // Log that we're up and running
         System.out.println("Server started on port " + Spark.port());
         
-        // Return the actual port the server is running on
         return Spark.port();
     }
-
+    
     /**
-     * Stops the server.
+     * Stops the server
      */
     public void stop() {
-        // Shut down the server
         Spark.stop();
-        
-        // Wait until the server has fully stopped
         Spark.awaitStop();
-        
         System.out.println("Server stopped");
     }
     
     /**
-     * Main method to start the server directly.
-     * This can be used for testing or running the server standalone.
+     * Main method to run the server directly
      */
     public static void main(String[] args) {
-        // Default port
+        // Default to port 8080
         int port = 8080;
         
-        // Use command line argument for port if provided
+        // Use command line arg if provided
         if (args.length > 0) {
             try {
                 port = Integer.parseInt(args[0]);
             } catch (NumberFormatException e) {
-                System.err.println("Invalid port number. Using default port 8080.");
+                System.out.println("Invalid port number. Using default port 8080.");
             }
         }
         
@@ -134,6 +125,6 @@ public class Server {
         server.run(port);
         
         System.out.println("Chess server running at http://localhost:" + port);
-        System.out.println("Press Ctrl+C to stop the server");
+        System.out.println("Press Ctrl+C to stop");
     }
 }
