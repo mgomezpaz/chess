@@ -91,12 +91,12 @@ public interface PieceMovesCalculator {
     */
     class BishopMovesCalculator implements PieceMovesCalculator {
         // get possible directions for the bishop
-        private static final int[][] bishop_rules = {
+        private static final int[][] BISHOP_RULES = {
             {1, 1}, {-1, 1}, {-1, -1}, {1, -1}
         };
         
         public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-            return calculateSlidingMoves(board, position, bishop_rules);
+            return calculateSlidingMoves(board, position, BISHOP_RULES);
         }
     }
 
@@ -105,13 +105,13 @@ public interface PieceMovesCalculator {
     */
     class KingMovesCalculator implements PieceMovesCalculator {
         // get possible directions for the king
-        private static final int[][] king_rules = {
+        private static final int[][] KING_RULES = {
             {1, 0}, {-1, 0}, {0, 1}, {0, -1}, 
             {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
         };
         
         public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-            return calculateSteppingMoves(board, position, king_rules);
+            return calculateSteppingMoves(board, position, KING_RULES);
         }
     }
     /* 
@@ -121,14 +121,14 @@ public interface PieceMovesCalculator {
     */
     class QueenMovesCalculator implements PieceMovesCalculator {
         // get possible directions for the queen
-        private static final int[][] queen_rules = {
+        private static final int[][] QUEEN_RULES = {
             {1, 0}, {-1, 0}, {0, 1}, {0, -1},  // Rook-like moves
             {1, 1}, {1, -1}, {-1, 1}, {-1, -1} // Bishop-like moves
         };
         
         @Override
         public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-            return calculateSlidingMoves(board, position, queen_rules);
+            return calculateSlidingMoves(board, position, QUEEN_RULES);
         }
     }
 
@@ -138,14 +138,14 @@ public interface PieceMovesCalculator {
     */
     class KnightMovesCalculator implements PieceMovesCalculator {
         // get possible directions for the knight
-        private static final int[][] knight_rules = {
+        private static final int[][] KNIGHT_RULES = {
             {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
             {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
         };
         
         @Override
         public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-            return calculateSteppingMoves(board, position, knight_rules);
+            return calculateSteppingMoves(board, position, KNIGHT_RULES);
         }
     }
 
@@ -156,13 +156,13 @@ public interface PieceMovesCalculator {
     */
     class RookMovesCalculator implements PieceMovesCalculator {
         // get possible directions for the rook
-        private static final int[][] rook_rules = {
+        private static final int[][] ROOK_RULES = {
             {1, 0}, {-1, 0}, {0, 1}, {0, -1}
         };
         
         @Override
         public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-            return calculateSlidingMoves(board, position, rook_rules);
+            return calculateSlidingMoves(board, position, ROOK_RULES);
         }
     }
 
@@ -181,7 +181,7 @@ public interface PieceMovesCalculator {
             
             // get the color of the pawn
             ChessGame.TeamColor color = board.getPiece(position).getTeamColor();
-            int starting_position = position.getRow();
+            int startingPosition = position.getRow();
             
             // Direction multiplier (white moves up, black moves down)
             int forward = (color == ChessGame.TeamColor.WHITE) ? 1 : -1;
@@ -190,8 +190,8 @@ public interface PieceMovesCalculator {
             checkPawnForwardMove(board, position, moves, forward, 1);
             
             // Initial two-square move
-            if ((color == ChessGame.TeamColor.WHITE && starting_position == 2) || 
-                (color == ChessGame.TeamColor.BLACK && starting_position == 7)) {
+            if ((color == ChessGame.TeamColor.WHITE && startingPosition == 2) || 
+                (color == ChessGame.TeamColor.BLACK && startingPosition == 7)) {
                 checkPawnForwardMove(board, position, moves, forward, 2);
             }
             

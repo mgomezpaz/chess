@@ -188,8 +188,12 @@ public class GameServiceTest {
         assertNotNull(ourGame, "Couldn't find our game in the list");
         
         // Check that we're the white player
-        assertEquals("testplayer", ourGame.whiteUsername(), 
-                "We should be the white player");
+        if (ourGame.whiteUsername() == null) {
+            fail("White username should be set");
+        }
+        if (!ourGame.whiteUsername().equals("testplayer")) {
+            fail("White username should match the user who joined");
+        }
     }
     
     @Test
