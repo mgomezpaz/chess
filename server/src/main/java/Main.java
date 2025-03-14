@@ -1,3 +1,5 @@
+import dataaccess.DatabaseManager;
+import dataaccess.DataAccessException;
 import server.Server;
 
 /**
@@ -19,6 +21,15 @@ public class Main {
             } catch (NumberFormatException e) {
                 System.err.println("Invalid port number. Using default port 8080.");
             }
+        }
+        
+        // Initialize the database
+        try {
+            DatabaseManager.initializeDatabase();
+            System.out.println("Database initialized successfully");
+        } catch (DataAccessException e) {
+            System.err.println("Failed to initialize database: " + e.getMessage());
+            return;
         }
         
         // Create and start the server
