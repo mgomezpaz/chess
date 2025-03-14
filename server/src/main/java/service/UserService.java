@@ -5,6 +5,7 @@ import exception.AlreadyTakenException;
 import exception.UnauthorizedException;
 import model.AuthData;
 import model.UserData;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import request.LoginRequest;
 import request.LogoutRequest;
 import request.RegisterRequest;
@@ -32,8 +33,8 @@ public class UserService {
 
     // No-arg constructor that uses the default DAOs
     public UserService() {
-        this.userDAO = MemoryUserDAO.getInstance();
-        this.authDAO = MemoryAuthDAO.getInstance();
+        this.userDAO = DAOFactory.getUserDAO();
+        this.authDAO = DAOFactory.getAuthDAO();
     }
 
     /**
@@ -73,21 +74,27 @@ public class UserService {
      * Logs in an existing user
      */
     public LoginResult login(LoginRequest request) throws DataAccessException, UnauthorizedException {
-        // Try to find the user
-        UserData userData = userDAO.getUser(request.username());
+        // Find the user in our database
+        UserData user_data = userDAO.getUser(request.username());
         
-        // Check if user exists and password matches
-        if (userData == null || !userData.password().equals(request.password())) {
+        // Make sure they exist and password is right
+        if (user_data == null) {
+            throw new UnauthorizedException("Invalid username or password");
+        }
+        
+        // Check password - don't tell them which part was wrong for security
+        MySqlUserDAO userDAOImpl = (MySqlUserDAO) userDAO;
+        if (!userDAOImpl.verifyPassword(request.password(), user_data.password())) {
             throw new UnauthorizedException("Invalid username or password");
         }
 
-        // User is valid, create a new auth token
-        String authToken = UUID.randomUUID().toString();
-        AuthData authData = new AuthData(authToken, request.username());
+        // User is good to go, make a new auth token
+        String newToken = UUID.randomUUID().toString();
+        AuthData authData = new AuthData(newToken, request.username());
         authDAO.createAuth(authData);
 
-        // Return the result with username and new token
-        return new LoginResult(request.username(), authToken);
+        // Send back their info
+        return new LoginResult(request.username(), newToken);
     }
 
     /**
