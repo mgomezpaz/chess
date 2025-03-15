@@ -30,9 +30,9 @@ public class GameService {
     }
 
     public GameService() {
-        // Get the singleton instances so we're all using the same data
-        this.gameDAO = MemoryGameDAO.getInstance();
-        this.authDAO = MemoryAuthDAO.getInstance();
+        // Get the instances from our factory
+        this.gameDAO = DAOFactory.getGameDAO();
+        this.authDAO = DAOFactory.getAuthDAO();
     }
 
     /**
@@ -95,6 +95,12 @@ public class GameService {
         // Get the player's info
         String username = authData.username();
         String color = request.playerColor();
+        
+        // Double check the username is valid
+        if (username == null || username.isEmpty()) {
+            // This should never happen since auth is valid
+            throw new BadRequestException("Invalid username");
+        }
         
         // Validate the color choice
         if (color == null || color.isEmpty()) {
