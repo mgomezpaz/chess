@@ -1,8 +1,7 @@
 package dataaccess;
 
 import model.UserData;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -45,7 +44,7 @@ public class MySqlUserDAO implements UserDAO {
                 throw new DataAccessException("Username already exists");
             }
 
-            // Hash the password
+            // Hash the password using BCrypt
             String hashedPassword = hashPassword(user.password());
 
             // Insert the user
@@ -84,31 +83,23 @@ public class MySqlUserDAO implements UserDAO {
     }
     
     /**
-     * Simple password hashing using SHA-256
+     * Hash a password using BCrypt
      */
-    private String hashPassword(String password) throws DataAccessException {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(password.getBytes());
-            StringBuilder hexString = new StringBuilder();
-            
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-            
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new DataAccessException("Error hashing password: " + e.getMessage());
-        }
+    private String hashPassword(String password) {
+        // Generate a salt and hash the password
+        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
     
     /**
      * Verify a password against its hash
      */
-    public boolean verifyPassword(String password, String hash) throws DataAccessException {
-        String hashedInput = hashPassword(password);
-        return hashedInput.equals(hash);
+    public boolean verifyPassword(String password, String hash) {
+        try {
+            // Use BCrypt to check if the password matches the hash
+            return BCrypt.checkpw(password, hash);
+        } catch (Exception e) {
+            // If BCrypt fails (maybe the hash isn't in BCrypt format), return false
+            return false;
+        }
     }
 }
