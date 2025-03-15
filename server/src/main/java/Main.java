@@ -12,7 +12,7 @@ public class Main {
      */
     public static void main(String[] args) {
         // Default port
-        int port = 8082;
+        int port = 8083;
         
         // Use command line argument for port if provided
         if (args.length > 0) {

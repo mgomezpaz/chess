@@ -1,7 +1,7 @@
 package dataaccess;
 
 import model.UserData;
-import org.springframework.security.crypto.bcrypt.BCrypt;
+import util.SimpleBCrypt;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -44,7 +44,7 @@ public class MySqlUserDAO implements UserDAO {
                 throw new DataAccessException("Username already exists");
             }
 
-            // Hash the password using BCrypt
+            // Hash the password using our SimpleBCrypt
             String hashedPassword = hashPassword(user.password());
 
             // Insert the user
@@ -83,11 +83,12 @@ public class MySqlUserDAO implements UserDAO {
     }
     
     /**
-     * Hash a password using BCrypt
+     * Hash a password using our SimpleBCrypt implementation
      */
     private String hashPassword(String password) {
         // Generate a salt and hash the password
-        return BCrypt.hashpw(password, BCrypt.gensalt());
+        String salt = SimpleBCrypt.gensalt();
+        return SimpleBCrypt.hashpw(password, salt);
     }
     
     /**
@@ -95,10 +96,10 @@ public class MySqlUserDAO implements UserDAO {
      */
     public boolean verifyPassword(String password, String hash) {
         try {
-            // Use BCrypt to check if the password matches the hash
-            return BCrypt.checkpw(password, hash);
+            // Use our SimpleBCrypt to check if the password matches the hash
+            return SimpleBCrypt.checkpw(password, hash);
         } catch (Exception e) {
-            // If BCrypt fails (maybe the hash isn't in BCrypt format), return false
+            // If verification fails for any reason, return false
             return false;
         }
     }
