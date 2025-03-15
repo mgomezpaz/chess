@@ -1,6 +1,7 @@
 package dataaccess;
 
 import model.AuthData;
+import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MySqlAuthDAOTest {
     private MySqlAuthDAO authDAO;
     private MySqlUserDAO userDAO;
-    
+
     @BeforeEach
     public void setUp() throws DataAccessException {
         authDAO = MySqlAuthDAO.getInstance();
@@ -21,17 +22,17 @@ public class MySqlAuthDAOTest {
         authDAO.clear();
         userDAO.clear();
         
-        // Create a test user for auth tokens
+        // Create a test user for auth tests
         userDAO.createUser(new UserData("testuser", "password", "test@example.com"));
     }
-    
+
     @Test
-    public void createAuth_success() throws DataAccessException {
+    public void testCreateAuth_Success() throws DataAccessException {
         // Arrange
-        AuthData authData = new AuthData("testtoken", "testuser");
+        AuthData auth = new AuthData("testtoken", "testuser");
         
         // Act
-        authDAO.createAuth(authData);
+        authDAO.createAuth(auth);
         
         // Assert
         AuthData retrievedAuth = authDAO.getAuth("testtoken");
@@ -39,21 +40,36 @@ public class MySqlAuthDAOTest {
         assertEquals("testtoken", retrievedAuth.authToken());
         assertEquals("testuser", retrievedAuth.username());
     }
-    
+
     @Test
-    public void getAuth_nonExistentToken() throws DataAccessException {
+    public void testGetAuth_AuthExists() throws DataAccessException {
+        // Arrange
+        AuthData auth = new AuthData("testtoken", "testuser");
+        authDAO.createAuth(auth);
+        
         // Act
-        AuthData authData = authDAO.getAuth("nonexistenttoken");
+        AuthData retrievedAuth = authDAO.getAuth("testtoken");
         
         // Assert
-        assertNull(authData);
+        assertNotNull(retrievedAuth);
+        assertEquals("testtoken", retrievedAuth.authToken());
+        assertEquals("testuser", retrievedAuth.username());
     }
-    
+
     @Test
-    public void deleteAuth_success() throws DataAccessException {
+    public void testGetAuth_AuthDoesNotExist() throws DataAccessException {
+        // Act
+        AuthData retrievedAuth = authDAO.getAuth("nonexistenttoken");
+        
+        // Assert
+        assertNull(retrievedAuth);
+    }
+
+    @Test
+    public void testDeleteAuth() throws DataAccessException {
         // Arrange
-        AuthData authData = new AuthData("testtoken", "testuser");
-        authDAO.createAuth(authData);
+        AuthData auth = new AuthData("testtoken", "testuser");
+        authDAO.createAuth(auth);
         
         // Act
         authDAO.deleteAuth("testtoken");
@@ -62,30 +78,26 @@ public class MySqlAuthDAOTest {
         AuthData retrievedAuth = authDAO.getAuth("testtoken");
         assertNull(retrievedAuth);
     }
-    
+
     @Test
-    public void getAllAuthData_success() throws DataAccessException {
+    public void testGetAllAuthData() throws DataAccessException {
         // Arrange
-        authDAO.clear();
-        AuthData authData1 = new AuthData("token1", "testuser");
-        AuthData authData2 = new AuthData("token2", "testuser");
-        authDAO.createAuth(authData1);
-        authDAO.createAuth(authData2);
+        authDAO.createAuth(new AuthData("token1", "testuser"));
+        authDAO.createAuth(new AuthData("token2", "testuser"));
         
         // Act
         List<AuthData> authList = authDAO.getAllAuthData();
         
         // Assert
         assertEquals(2, authList.size());
-        assertTrue(authList.stream().anyMatch(auth -> auth.authToken().equals("token1")));
-        assertTrue(authList.stream().anyMatch(auth -> auth.authToken().equals("token2")));
+        assertTrue(authList.stream().anyMatch(a -> a.authToken().equals("token1")));
+        assertTrue(authList.stream().anyMatch(a -> a.authToken().equals("token2")));
     }
-    
+
     @Test
-    public void clear_success() throws DataAccessException {
+    public void testClear() throws DataAccessException {
         // Arrange
-        AuthData authData = new AuthData("testtoken", "testuser");
-        authDAO.createAuth(authData);
+        authDAO.createAuth(new AuthData("testtoken", "testuser"));
         
         // Act
         authDAO.clear();

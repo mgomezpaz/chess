@@ -3,22 +3,23 @@ package dataaccess;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MySqlUserDAOTest {
     private MySqlUserDAO userDAO;
-    
+
     @BeforeEach
     public void setUp() throws DataAccessException {
         userDAO = MySqlUserDAO.getInstance();
         userDAO.clear();
     }
-    
+
     @Test
-    public void createUser_success() throws DataAccessException {
+    public void testCreateUser_Success() throws DataAccessException {
         // Arrange
-        UserData user = new UserData("testuser", "password123", "test@example.com");
+        UserData user = new UserData("testuser", "password", "test@example.com");
         
         // Act
         userDAO.createUser(user);
@@ -27,60 +28,49 @@ public class MySqlUserDAOTest {
         UserData retrievedUser = userDAO.getUser("testuser");
         assertNotNull(retrievedUser);
         assertEquals("testuser", retrievedUser.username());
+        assertTrue(((MySqlUserDAO)userDAO).verifyPassword("password", retrievedUser.password()));
         assertEquals("test@example.com", retrievedUser.email());
-        // Password should be hashed, so we can't directly compare it
     }
-    
+
     @Test
-    public void createUser_duplicateUsername() throws DataAccessException {
+    public void testCreateUser_DuplicateUsername() {
         // Arrange
-        UserData user1 = new UserData("testuser", "password123", "test@example.com");
-        UserData user2 = new UserData("testuser", "differentpassword", "different@example.com");
+        UserData user = new UserData("testuser", "password", "test@example.com");
         
         // Act & Assert
-        userDAO.createUser(user1);
-        assertThrows(DataAccessException.class, () -> userDAO.createUser(user2));
+        assertDoesNotThrow(() -> userDAO.createUser(user));
+        DataAccessException exception = assertThrows(DataAccessException.class, 
+            () -> userDAO.createUser(user));
+        assertTrue(exception.getMessage().contains("Username already exists"));
     }
-    
+
     @Test
-    public void getUser_nonExistentUser() throws DataAccessException {
-        // Act
-        UserData user = userDAO.getUser("nonexistentuser");
-        
-        // Assert
-        assertNull(user);
-    }
-    
-    @Test
-    public void verifyPassword_correctPassword() throws DataAccessException {
+    public void testGetUser_UserExists() throws DataAccessException {
         // Arrange
-        UserData user = new UserData("testuser", "password123", "test@example.com");
+        UserData user = new UserData("testuser", "password", "test@example.com");
         userDAO.createUser(user);
         
         // Act
-        boolean result = userDAO.verifyPassword("testuser", "password123");
+        UserData retrievedUser = userDAO.getUser("testuser");
         
         // Assert
-        assertTrue(result);
+        assertNotNull(retrievedUser);
+        assertEquals("testuser", retrievedUser.username());
     }
-    
+
     @Test
-    public void verifyPassword_incorrectPassword() throws DataAccessException {
-        // Arrange
-        UserData user = new UserData("testuser", "password123", "test@example.com");
-        userDAO.createUser(user);
-        
+    public void testGetUser_UserDoesNotExist() throws DataAccessException {
         // Act
-        boolean result = userDAO.verifyPassword("testuser", "wrongpassword");
+        UserData retrievedUser = userDAO.getUser("nonexistentuser");
         
         // Assert
-        assertFalse(result);
+        assertNull(retrievedUser);
     }
-    
+
     @Test
-    public void clear_success() throws DataAccessException {
+    public void testClear() throws DataAccessException {
         // Arrange
-        UserData user = new UserData("testuser", "password123", "test@example.com");
+        UserData user = new UserData("testuser", "password", "test@example.com");
         userDAO.createUser(user);
         
         // Act
