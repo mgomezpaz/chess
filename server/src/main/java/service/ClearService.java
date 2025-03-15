@@ -7,7 +7,7 @@ import result.ClearResult;
  * Service for clearing all data
  */
 public class ClearService {
-    // We need access to all the DAOs to clear everything
+    // Our data access objects
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
     private final GameDAO gameDAO;
@@ -19,25 +19,21 @@ public class ClearService {
     }
 
     public ClearService() {
-        // Get the singleton instances of all our DAOs
-        // This ensures we're clearing the same data that other services are using
-        this.userDAO = MemoryUserDAO.getInstance();
-        this.authDAO = MemoryAuthDAO.getInstance();
-        this.gameDAO = MemoryGameDAO.getInstance();
+        // Get the instances from our factory
+        this.userDAO = DAOFactory.getUserDAO();
+        this.authDAO = DAOFactory.getAuthDAO();
+        this.gameDAO = DAOFactory.getGameDAO();
     }
 
     /**
      * Clears all data from the system - use with caution!
-     * As they say, "nuke it from orbit, it's the only way to be sure"
      */
     public ClearResult clear() throws DataAccessException {
         try {
-            // Wipe everything clean
-            // The order doesn't really matter since we're in memory,
-            // but it might matter later with a real database (foreign keys, etc.)
-            userDAO.clear();
-            authDAO.clear();
-            gameDAO.clear();
+            // Wipe everything clean in the correct order to avoid foreign key constraint issues
+            authDAO.clear();  // Clear auth tokens first (they reference users)
+            gameDAO.clear();  // Clear games next
+            userDAO.clear();  // Clear users last
             
             // All done - everything is gone!
             return new ClearResult();

@@ -10,6 +10,8 @@ public class Server {
     // Our request handler
     private final Handler handler;
     
+    private boolean started = false;
+    
     /**
      * Creates a new server instance
      */
@@ -21,9 +23,18 @@ public class Server {
     /**
      * Starts the server on the specified port
      */
-    public int run(int desiredPort) {
-        // Tell Spark which port to use
-        Spark.port(desiredPort);
+    public int run(int port) {
+        if (started) {
+            // Server already started, just return the port
+            return port;
+        }
+        
+        // Initialize Spark
+        if (port == 0) {
+            Spark.port(0);
+        } else {
+            Spark.port(port);
+        }
         
         // Set up the directory for static web files
         Spark.staticFiles.location("web");
@@ -54,6 +65,7 @@ public class Server {
         
         // Log all requests - helpful for debugging
         Spark.before((req, res) -> {
+            // This helped me track down that weird client issue
             System.out.println(req.requestMethod() + " " + req.pathInfo());
             if (req.body() != null && !req.body().isEmpty()) {
                 System.out.println("Body: " + req.body());
@@ -92,7 +104,9 @@ public class Server {
         // Log that we're up and running
         System.out.println("Server started on port " + Spark.port());
         
-        return Spark.port();
+        started = true;
+        
+        return port == 0 ? Spark.port() : port;
     }
     
     /**
@@ -100,7 +114,8 @@ public class Server {
      */
     public void stop() {
         Spark.stop();
-        Spark.awaitStop();
+        Spark.awaitStop(); // Wait for Spark to fully stop
+        started = false;
         System.out.println("Server stopped");
     }
     
