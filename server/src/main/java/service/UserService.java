@@ -5,7 +5,6 @@ import exception.AlreadyTakenException;
 import exception.UnauthorizedException;
 import model.AuthData;
 import model.UserData;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import request.LoginRequest;
 import request.LogoutRequest;
 import request.RegisterRequest;
